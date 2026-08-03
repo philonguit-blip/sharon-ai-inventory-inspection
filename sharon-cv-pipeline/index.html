@@ -1,0 +1,122 @@
+export default {
+  async fetch(request, env, ctx) {
+    const html = `
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Cổng Tải Video - AI Inventory</title>
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f2f1; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; width: 100%; text-align: center; }
+        h2 { color: #005a9e; margin-top: 0; }
+        p { color: #605e5c; font-size: 14px; }
+        input[type="file"] { margin: 20px 0; width: 100%; }
+        button { background: #0078d4; color: white; border: none; padding: 12px 20px; border-radius: 4px; width: 100%; font-size: 16px; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #106ebe; }
+        button:disabled { background: #c8c6c4; cursor: not-allowed; }
+        #status { margin-top: 20px; font-weight: bold; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h2>Kiểm Định 5S Kho Bãi</h2>
+        <p id="greeting">Đang tải thông tin...</p>
+        <input type="file" id="videoInput" accept="video/mp4,video/quicktime,video/x-msvideo" />
+        <button id="uploadBtn" onclick="startUpload()">Bắt đầu Upload</button>
+        <div id="status"></div>
+      </div>
+
+      <script>
+        // --- CẤU HÌNH WEBHOOK WORKFLOW 2 CỦA N8N ---
+        // THAY BẰNG LINK WEBHOOK BẠN COPY Ở BƯỚC 2
+        const N8N_WORKFLOW_2_WEBHOOK = "https://n8n.sharon-finefoods.com/webhook-test/trigger-ai-engine";
+        
+        // Trích xuất tham số từ URL do Workflow 1 truyền sang
+        const urlParams = new URLSearchParams(window.location.search);
+        const presignedUrl = urlParams.get('token');
+        const msgId = urlParams.get('msgId');
+        const videoKey = urlParams.get('key');
+        const sender = urlParams.get('sender') || 'Bạn';
+
+        document.getElementById('greeting').innerText = 'Chào ' + sender + ', vui lòng chọn video (< 50MB) để tải lên.';
+
+        async function startUpload() {
+          const fileInput = document.getElementById('videoInput');
+          const statusDiv = document.getElementById('status');
+          const btn = document.getElementById('uploadBtn');
+
+          if (!fileInput.files.length) {
+            statusDiv.innerText = 'Vui lòng chọn một file video!';
+            statusDiv.style.color = '#d83b01';
+            return;
+          }
+
+          const file = fileInput.files[0];
+          if (file.size > 50 * 1024 * 1024) { 
+            statusDiv.innerText = 'File quá lớn! Chỉ hỗ trợ video dưới 50MB.';
+            statusDiv.style.color = '#d83b01';
+            return;
+          }
+
+          if (!presignedUrl) {
+            statusDiv.innerText = 'Lỗi: Link upload không hợp lệ hoặc đã hết hạn.';
+            statusDiv.style.color = '#d83b01';
+            return;
+          }
+
+          btn.disabled = true;
+          statusDiv.innerText = 'Đang đẩy dữ liệu lên Cloudflare R2... Vui lòng không đóng tab này.';
+          statusDiv.style.color = '#0078d4';
+
+          try {
+            // 1. Gửi file trực tiếp lên R2 thông qua Pre-signed URL
+            const putResponse = await fetch(presignedUrl, {
+              method: 'PUT',
+              body: file,
+              headers: { 'Content-Type': file.type || 'video/mp4' }
+            });
+
+            if (putResponse.ok) {
+              statusDiv.innerText = 'Upload Cloud thành công! Đang báo thức AI...';
+              statusDiv.style.color = '#107c41';
+              
+              // 2. Kích hoạt Workflow 2 của n8n
+              const triggerResponse = await fetch(N8N_WORKFLOW_2_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  sender: sender,
+                  messageId: msgId,
+                  videoKey: videoKey
+                })
+              });
+
+              if (triggerResponse.ok) {
+                statusDiv.innerText = 'Hoàn tất! Bạn có thể quay lại Microsoft Teams để xem AI làm việc.';
+              } else {
+                statusDiv.innerText = 'Upload thành công nhưng không thể gọi AI. Vui lòng báo kỹ thuật.';
+                statusDiv.style.color = '#d83b01';
+              }
+            } else {
+              statusDiv.innerText = 'Lỗi upload R2: ' + putResponse.statusText;
+              statusDiv.style.color = '#d83b01';
+              btn.disabled = false;
+            }
+          } catch (error) {
+            statusDiv.innerText = 'Lỗi mạng: ' + error.message;
+            statusDiv.style.color = '#d83b01';
+            btn.disabled = false;
+          }
+        }
+      </script>
+    </body>
+    </html>
+    `;
+    
+    return new Response(html, {
+      headers: { 'Content-Type': 'text/html;charset=UTF-8' }
+    });
+  }
+};

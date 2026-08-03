@@ -1,0 +1,10 @@
+/*
+  Content-Security-Policy: default-src 'self'; connect-src 'self' https://n8n.sharon-finefoods.com https://*.r2.cloudflarestorage.com https://*.r2.dev; img-src 'self' data: blob: https:; style-src 'self'; script-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Cache-Control: no-cache
+
+/assets/*
+  Cache-Control: public, max-age=3600, must-revalidate

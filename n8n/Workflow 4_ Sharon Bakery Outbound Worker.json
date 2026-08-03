@@ -1,0 +1,625 @@
+{
+  "name": "Sharon Bakery - Outbound AI Worker Queue",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-upload-init",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        -540
+      ],
+      "id": "outbound-worker-001",
+      "name": "01 - Init Upload",
+      "webhookId": "outbound-worker-002",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.requests = store.requests || {};\nstore.jobs = store.jobs || {};\nconst body = $json.body || {};\nconst files = Array.isArray(body.files) ? body.files : [];\nconst allowed = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/bmp']);\nconst maxImages = 50;\nconst maxFile = 50 * 1024 * 1024;\nconst maxTotalMb = Math.max(1, Number(store.worker?.max_job_upload_size_mb || 160));\nconst maxTotal = maxTotalMb * 1024 * 1024;\nlet error = '';\nif (!files.length) error = 'Upload at least one image.';\nelse if (files.length > maxImages) error = 'A job accepts at most 50 images.';\nelse if (files.some(f => !allowed.has(String(f.content_type || '')))) error = 'Unsupported image format.';\nelse if (files.some(f => Number(f.size_bytes || 0) <= 0 || Number(f.size_bytes) > maxFile)) error = 'An image exceeds the 50 MB limit.';\nelse if (files.reduce((sum, f) => sum + Number(f.size_bytes || 0), 0) > maxTotal) error = 'Total upload exceeds the ' + maxTotalMb + ' MB limit.';\nif (error) return [{ json: { status: 'ERROR', error, detail: error } }];\nconst jobId = Array.from(\n  { length: 32 },\n  () => Math.floor(Math.random() * 16).toString(16),\n).join('');\nconst now = Date.now();\nconst task = { task_id: jobId, job_id: jobId, task_type: 'PRESIGN', payload: { files }, status: 'QUEUED', attempts: 0, created_at: now, updated_at: now };\nstore.tasks[jobId] = task;\nstore.queue.push(jobId);\nstore.requests[jobId] = { request_id: jobId, job_id: jobId, status: 'WAITING_FOR_WORKER', created_at: new Date(now).toISOString() };\nreturn [{ json: store.requests[jobId] }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        -540
+      ],
+      "id": "outbound-worker-003",
+      "name": "01 - Init Upload - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -120,
+        -540
+      ],
+      "id": "outbound-worker-004",
+      "name": "01 - Init Upload - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "bakery-request-status",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        -360
+      ],
+      "id": "outbound-worker-005",
+      "name": "01b - Upload Status",
+      "webhookId": "outbound-worker-006",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.requests = store.requests || {};\nconst requestId = String(($json.query || {}).request_id || '');\nconst request = store.requests[requestId];\nif (!request) return [{ json: { status: 'ERROR', error: 'Upload request not found.', detail: 'Upload request not found.' } }];\nreturn [{ json: request }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        -360
+      ],
+      "id": "outbound-worker-007",
+      "name": "01b - Upload Status - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -120,
+        -360
+      ],
+      "id": "outbound-worker-008",
+      "name": "01b - Upload Status - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-submit",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        -180
+      ],
+      "id": "outbound-worker-009",
+      "name": "02 - Submit Job",
+      "webhookId": "outbound-worker-010",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.jobs = store.jobs || {};\nconst body = $json.body || {};\nconst jobId = String(body.job_id || '');\nconst files = Array.isArray(body.files) ? body.files : [];\nif (!/^[0-9a-f]{32}$/.test(jobId) || !files.length) {\n  const detail = 'Invalid job ID or empty R2 file list.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\nif (store.jobs[jobId]) return [{ json: store.jobs[jobId] }];\nconst uploadRequest = store.requests?.[jobId];\nconst expectedFiles = Array.isArray(uploadRequest?.uploads)\n  ? uploadRequest.uploads.map(item => ({ object_key: String(item.object_key || '') }))\n  : [];\nconst suppliedKeys = files.map(item => String(item.object_key || '')).sort();\nconst expectedKeys = expectedFiles.map(item => item.object_key).sort();\nif (\n  uploadRequest?.status !== 'READY'\n  || !expectedFiles.length\n  || JSON.stringify(suppliedKeys) !== JSON.stringify(expectedKeys)\n) {\n  const detail = 'R2 files do not match a ready upload session.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\nconst now = Date.now();\nconst taskId = 'process-' + jobId;\nstore.tasks[taskId] = { task_id: taskId, job_id: jobId, task_type: 'PROCESS', payload: { job_id: jobId, files: expectedFiles }, status: 'QUEUED', attempts: 0, created_at: now, updated_at: now };\nstore.queue.push(taskId);\nstore.jobs[jobId] = { job_id: jobId, status: 'QUEUED', total_images: files.length, processed_images: 0, created_at: new Date(now).toISOString(), updated_at: new Date(now).toISOString(), products: [], images: [], r2_objects: [], error: '' };\nreturn [{ json: { ...store.jobs[jobId], status_url: '/webhook/bakery-job-status?job_id=' + jobId, message: 'Job queued for the outbound AI worker.' } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        -180
+      ],
+      "id": "outbound-worker-011",
+      "name": "02 - Submit Job - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -120,
+        -180
+      ],
+      "id": "outbound-worker-012",
+      "name": "02 - Submit Job - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "bakery-job-status",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        0
+      ],
+      "id": "outbound-worker-013",
+      "name": "03 - Job Status",
+      "webhookId": "outbound-worker-014",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.jobs = store.jobs || {};\nconst jobId = String(($json.query || {}).job_id || '');\nconst job = store.jobs[jobId];\nif (!job) return [{ json: { status: 'ERROR', error: 'Job not found.', detail: 'Job not found.' } }];\nreturn [{ json: job }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        0
+      ],
+      "id": "outbound-worker-015",
+      "name": "03 - Job Status - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -120,
+        0
+      ],
+      "id": "outbound-worker-016",
+      "name": "03 - Job Status - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "bakery-worker-next",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        180
+      ],
+      "id": "outbound-worker-017",
+      "name": "04 - Worker Next",
+      "webhookId": "outbound-worker-018",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nconst workerId = String(($json.query || {}).worker_id || 'unknown-worker');\nconst now = Date.now();\nconst leaseMs = 60 * 60 * 1000;\nlet selected = null;\nfor (const taskId of store.queue) {\n  const task = store.tasks[taskId];\n  if (!task) continue;\n  const expired = task.status === 'LEASED' && Number(task.leased_at || 0) + leaseMs < now;\n  if (task.status === 'QUEUED' || expired) {\n    task.status = 'LEASED';\n    task.leased_at = now;\n    task.leased_by = workerId;\n    task.attempts = Number(task.attempts || 0) + 1;\n    task.updated_at = now;\n    selected = { ...task };\n    break;\n  }\n}\nreturn [{ json: { task: selected } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        180
+      ],
+      "id": "outbound-worker-019",
+      "name": "04 - Worker Next - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -120,
+        180
+      ],
+      "id": "outbound-worker-020",
+      "name": "04 - Worker Next - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-worker-result",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        360
+      ],
+      "id": "outbound-worker-021",
+      "name": "05 - Worker Result",
+      "webhookId": "outbound-worker-022",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.requests = store.requests || {};\nstore.jobs = store.jobs || {};\nconst body = $json.body || {};\nconst taskId = String(body.task_id || '');\nconst task = store.tasks[taskId];\nif (!task) return [{ json: { ok: false, detail: 'Task not found.' } }];\nif (task.status === 'COMPLETED' || task.status === 'ERROR') {\n  return [{ json: { ok: true, task_id: taskId, final: true, duplicate: true } }];\n}\nif (String(task.leased_by || '') !== String(body.worker_id || '')) {\n  return [{ json: { ok: false, detail: 'Task lease does not belong to this worker.' } }];\n}\nconst now = Date.now();\nconst result = body.result && typeof body.result === 'object' ? body.result : {};\nconst ok = body.ok === true;\nconst final = body.final === true;\nconst error = String(body.error || result.error || '');\ntask.updated_at = now;\ntask.leased_at = now;\nif (task.task_type === 'PRESIGN') {\n  if (ok && final) store.requests[task.job_id] = { ...result, request_id: task.job_id, job_id: task.job_id, status: 'READY', updated_at: new Date(now).toISOString() };\n  if (!ok && final) store.requests[task.job_id] = { request_id: task.job_id, job_id: task.job_id, status: 'ERROR', error, detail: error, updated_at: new Date(now).toISOString() };\n}\nif (task.task_type === 'PROCESS') {\n  if (ok) store.jobs[task.job_id] = { ...(store.jobs[task.job_id] || {}), ...result, job_id: task.job_id, updated_at: new Date(now).toISOString() };\n  if (!ok && final) store.jobs[task.job_id] = { ...(store.jobs[task.job_id] || {}), ...result, job_id: task.job_id, status: 'ERROR', error, updated_at: new Date(now).toISOString() };\n}\nif (final) {\n  task.status = ok ? 'COMPLETED' : 'ERROR';\n  store.queue = store.queue.filter(id => id !== taskId);\n}\nreturn [{ json: { ok: true, task_id: taskId, final } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        360
+      ],
+      "id": "outbound-worker-023",
+      "name": "05 - Worker Result - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -120,
+        360
+      ],
+      "id": "outbound-worker-024",
+      "name": "05 - Worker Result - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-worker-heartbeat",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        540
+      ],
+      "id": "outbound-worker-025",
+      "name": "06 - Worker Heartbeat",
+      "webhookId": "outbound-worker-026",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nconst body = $json.body || {};\nconst now = Date.now();\nstore.worker = { ...body, last_seen_ms: now, last_seen: new Date(now).toISOString() };\nif (Number(store.last_cleanup_ms || 0) + 60 * 60 * 1000 < now) {\n  store.tasks = store.tasks || {};\n  store.requests = store.requests || {};\n  store.jobs = store.jobs || {};\n  const taskCutoff = now - 24 * 60 * 60 * 1000;\n  const jobCutoff = now - 30 * 24 * 60 * 60 * 1000;\n  for (const [id, task] of Object.entries(store.tasks)) {\n    if (['COMPLETED', 'ERROR'].includes(String(task.status || '')) && Number(task.updated_at || 0) < taskCutoff) delete store.tasks[id];\n  }\n  for (const [id, request] of Object.entries(store.requests)) {\n    const updated = Date.parse(request.updated_at || request.created_at || 0);\n    if (Number.isFinite(updated) && updated < taskCutoff) delete store.requests[id];\n  }\n  for (const [id, job] of Object.entries(store.jobs)) {\n    const updated = Date.parse(job.updated_at || job.created_at || 0);\n    if (['COMPLETED', 'ERROR'].includes(String(job.status || '')) && Number.isFinite(updated) && updated < jobCutoff) delete store.jobs[id];\n  }\n  store.queue = (store.queue || []).filter(id => store.tasks[id] && !['COMPLETED', 'ERROR'].includes(String(store.tasks[id].status || '')));\n  store.last_cleanup_ms = now;\n}\nreturn [{ json: { ok: true, worker_id: String(body.worker_id || '') } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        540
+      ],
+      "id": "outbound-worker-027",
+      "name": "06 - Worker Heartbeat - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -120,
+        540
+      ],
+      "id": "outbound-worker-028",
+      "name": "06 - Worker Heartbeat - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "bakery-health",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        720
+      ],
+      "id": "outbound-worker-029",
+      "name": "00 - Health",
+      "webhookId": "outbound-worker-030",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nconst worker = store.worker || {};\nconst online = Number(worker.last_seen_ms || 0) + 30000 > Date.now();\nreturn [{ json: {\n  ready: online && worker.ready === true && worker.r2_configured === true,\n  orchestration: 'n8n-outbound-worker',\n  worker_online: online,\n  worker_id: worker.worker_id || null,\n  worker_last_seen: worker.last_seen || null,\n  r2_configured: worker.r2_configured === true,\n  kiotviet_configured: worker.kiotviet_configured === true,\n  kiotviet_auto_create_draft: worker.kiotviet_auto_create_draft === true,\n  model: worker.model || null,\n  max_images_per_job: worker.max_images_per_job || 50,\n  max_image_size_mb: worker.max_image_size_mb || 50,\n  max_job_upload_size_mb: worker.max_job_upload_size_mb || 160,\n  allowed_image_extensions: worker.allowed_image_extensions || ['.jpg', '.jpeg', '.png', '.webp', '.bmp'],\n  error: online ? '' : 'Outbound AI worker is offline.'\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        720
+      ],
+      "id": "outbound-worker-031",
+      "name": "00 - Health - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -120,
+        720
+      ],
+      "id": "outbound-worker-032",
+      "name": "00 - Health - Respond"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "01 - Init Upload": {
+      "main": [
+        [
+          {
+            "node": "01 - Init Upload - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 - Init Upload - State": {
+      "main": [
+        [
+          {
+            "node": "01 - Init Upload - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01b - Upload Status": {
+      "main": [
+        [
+          {
+            "node": "01b - Upload Status - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01b - Upload Status - State": {
+      "main": [
+        [
+          {
+            "node": "01b - Upload Status - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Submit Job": {
+      "main": [
+        [
+          {
+            "node": "02 - Submit Job - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Submit Job - State": {
+      "main": [
+        [
+          {
+            "node": "02 - Submit Job - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Job Status": {
+      "main": [
+        [
+          {
+            "node": "03 - Job Status - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Job Status - State": {
+      "main": [
+        [
+          {
+            "node": "03 - Job Status - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 - Worker Next": {
+      "main": [
+        [
+          {
+            "node": "04 - Worker Next - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 - Worker Next - State": {
+      "main": [
+        [
+          {
+            "node": "04 - Worker Next - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 - Worker Result": {
+      "main": [
+        [
+          {
+            "node": "05 - Worker Result - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 - Worker Result - State": {
+      "main": [
+        [
+          {
+            "node": "05 - Worker Result - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 - Worker Heartbeat": {
+      "main": [
+        [
+          {
+            "node": "06 - Worker Heartbeat - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 - Worker Heartbeat - State": {
+      "main": [
+        [
+          {
+            "node": "06 - Worker Heartbeat - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 - Health": {
+      "main": [
+        [
+          {
+            "node": "00 - Health - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 - Health - State": {
+      "main": [
+        [
+          {
+            "node": "00 - Health - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

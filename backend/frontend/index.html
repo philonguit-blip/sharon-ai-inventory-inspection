@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Đếm sản phẩm bakery và tạo phiếu nhập KiotViet." />
+    <title>Sharon Bakery · AI Inventory</title>
+    <link rel="stylesheet" href="/assets/styles.css?v=3" />
+    <script src="/assets/config.js?v=3"></script>
+    <script src="/assets/app.js?v=13" defer></script>
+  </head>
+  <body>
+    <div id="remote-login" class="auth-overlay remote-only" role="dialog" aria-modal="true" aria-labelledby="remote-login-title">
+      <form id="remote-login-form" class="auth-card">
+        <span class="brand-mark auth-brand">SB</span>
+        <p class="step-label">TRUY CẬP TỪ XA</p>
+        <h1 id="remote-login-title">Đăng nhập Sharon Bakery</h1>
+        <p class="auth-copy">Dùng tài khoản vận hành được cấp cho website kiểm đếm. Mật khẩu chỉ được giữ trong phiên trình duyệt này.</p>
+        <label for="remote-username">Tên đăng nhập</label>
+        <input id="remote-username" name="username" type="text" autocomplete="username" required />
+        <label for="remote-password">Mật khẩu</label>
+        <input id="remote-password" name="password" type="password" autocomplete="current-password" required />
+        <button id="remote-login-submit" class="button button-primary button-wide" type="submit">Đăng nhập</button>
+        <p id="remote-login-error" class="message message-error hidden" role="alert"></p>
+      </form>
+    </div>
+
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Sharon Bakery AI Inventory">
+        <span class="brand-mark">SB</span>
+        <span>
+          <strong>Sharon Bakery</strong>
+          <small>AI Inventory</small>
+        </span>
+      </a>
+      <div class="header-meta">
+        <button id="remote-logout" class="text-button remote-session-only" type="button">Đăng xuất</button>
+        <span class="branch-badge">Warehouse</span>
+        <div id="system-status" class="system-status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span>Đang kiểm tra hệ thống…</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-grid">
+          <div class="hero-content">
+            <p class="eyebrow"><span></span> KIỂM KÊ NHẬP HÀNG BẰNG AI</p>
+            <h1>Kiểm đếm chính xác.<br /><em>Nhập hàng nhanh hơn.</em></h1>
+            <p class="hero-copy">
+              Tải ảnh khay bánh, hệ thống tự động nhận diện sản phẩm, tổng hợp số
+              lượng và chuẩn bị phiếu nhập nháp để bạn kiểm tra.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary hero-button" href="#upload-panel">Bắt đầu kiểm đếm</a>
+              <span>Tự động kiểm tra và tạo phiếu nháp khi dữ liệu hợp lệ</span>
+            </div>
+          </div>
+          <aside id="hero-panel" class="hero-panel" aria-label="Cấu hình hệ thống">
+            <div class="hero-panel-head">
+              <span class="live-indicator"></span>
+              <div><small>TRẠNG THÁI</small><strong id="hero-status-label">Đang kiểm tra…</strong></div>
+            </div>
+            <dl>
+              <div><dt>Mô hình</dt><dd>YOLO26s</dd></div>
+              <div><dt>Kích thước ảnh</dt><dd>1280 px</dd></div>
+              <div><dt>Đầu ra</dt><dd>Excel + R2</dd></div>
+              <div><dt>KiotViet</dt><dd>Tự động · Phiếu nháp</dd></div>
+            </dl>
+          </aside>
+        </div>
+        <div class="pipeline" aria-label="Quy trình xử lý">
+          <span><b>1</b><small>Chuẩn bị</small>Chọn ảnh</span>
+          <i></i>
+          <span><b>2</b><small>Xử lý</small>AI kiểm đếm</span>
+          <i></i>
+          <span><b>3</b><small>Đối soát</small>Kiểm tra kết quả</span>
+          <i></i>
+          <span><b>4</b><small>Hoàn tất</small>Tạo phiếu nháp</span>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <article id="upload-panel" class="card upload-card">
+          <div class="card-heading">
+            <div>
+              <p class="step-label">BƯỚC 1</p>
+              <h2>Chọn ảnh cần kiểm đếm</h2>
+            </div>
+            <span id="file-counter" class="counter">0 ảnh</span>
+          </div>
+
+          <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Chọn ảnh tải lên">
+            <div class="upload-icon" aria-hidden="true">↑</div>
+            <h3>Kéo và thả ảnh vào đây</h3>
+            <p>hoặc chọn ảnh từ máy tính</p>
+            <div class="picker-actions">
+              <button id="pick-files" class="button button-secondary" type="button">Chọn ảnh</button>
+              <button id="pick-folder" class="button button-ghost" type="button">Chọn thư mục</button>
+            </div>
+            <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/bmp" multiple hidden />
+            <input id="folder-input" type="file" accept="image/jpeg,image/png,image/webp,image/bmp" multiple webkitdirectory directory hidden />
+            <small id="upload-limits">JPG, PNG, WEBP hoặc BMP</small>
+          </div>
+
+          <div id="selection" class="selection hidden">
+            <div class="selection-bar">
+              <span id="selection-summary"></span>
+              <button id="clear-files" class="text-button" type="button">Xóa tất cả</button>
+            </div>
+            <ul id="file-list" class="file-list"></ul>
+          </div>
+
+          <div id="upload-progress" class="progress-wrap hidden" aria-live="polite">
+            <div class="progress-copy"><span>Đang tải ảnh…</span><strong id="progress-value">0%</strong></div>
+            <div class="progress-track"><span id="progress-bar"></span></div>
+          </div>
+
+          <button id="start-job" class="button button-primary button-wide" type="button" disabled>
+            Kiểm đếm và tạo phiếu nháp
+          </button>
+          <p id="upload-error" class="message message-error hidden" role="alert"></p>
+        </article>
+
+        <aside class="card guide-card">
+          <p class="step-label">CHỤP ẢNH TỐT</p>
+          <h2>Ba lưu ý để đếm chính xác</h2>
+          <ol class="tips">
+            <li><b>Chụp thẳng từ trên xuống</b><span>Thấy trọn khay và không cắt mất sản phẩm.</span></li>
+            <li><b>Ánh sáng đều, ảnh rõ nét</b><span>Tránh rung, bóng tối và vùng bị cháy sáng.</span></li>
+            <li><b>Mỗi khay chỉ chụp một lần</b><span>Không gửi ảnh trùng để tránh cộng số lượng hai lần.</span></li>
+          </ol>
+          <div class="safety-note">
+            <span>✓</span>
+            <p><b>Kiểm soát an toàn</b>Chỉ tạo phiếu nháp sau khi chi nhánh và hàng hóa được xác thực.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="processing-section" class="card result-card hidden" aria-live="polite">
+        <div class="result-state">
+          <span class="spinner" aria-hidden="true"></span>
+          <div>
+            <p class="step-label">BƯỚC 2</p>
+            <h2 id="processing-title">AI đang kiểm đếm…</h2>
+            <p id="processing-copy">Đã xử lý 0/0 ảnh.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="results-section" class="hidden">
+        <div class="section-heading">
+          <div>
+            <p class="step-label">BƯỚC 3</p>
+            <h2>Kết quả kiểm đếm</h2>
+          </div>
+          <span id="job-reference" class="job-reference"></span>
+        </div>
+
+        <div class="metrics">
+          <article><span>Mặt hàng</span><strong id="metric-products">0</strong></article>
+          <article><span>Tổng số lượng</span><strong id="metric-quantity">0</strong></article>
+          <article><span>Ảnh đã xử lý</span><strong id="metric-images">0</strong></article>
+          <article><span>Lưu trữ R2</span><strong id="metric-r2">—</strong></article>
+        </div>
+
+        <article class="card table-card">
+          <div class="card-heading compact">
+            <h3>Danh sách hàng nhập</h3>
+            <a id="download-excel" class="button button-secondary" href="#">Tải file Excel</a>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Mã hàng</th><th>Tên hàng</th><th class="number">Số lượng</th><th class="number">Đơn giá</th></tr></thead>
+              <tbody id="product-rows"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card image-card">
+          <div class="card-heading compact"><h3>Ảnh đã nhận diện</h3></div>
+          <div id="annotated-grid" class="annotated-grid"></div>
+        </article>
+
+        <article class="card kiotviet-card">
+          <div class="kiotviet-copy">
+            <p class="step-label">BƯỚC 4</p>
+            <h2>Phiếu nhập nháp trên KiotViet</h2>
+            <p>Hệ thống tự kiểm tra và tạo phiếu nháp tại <b>Warehouse</b> · Nhà cung cấp để trống · Đơn giá 0 đồng.</p>
+            <p class="muted">KiotViet hiện tự gán người nhập mặc định của kết nối API.</p>
+          </div>
+          <div class="kiotviet-actions">
+            <button id="preview-kiotviet" class="button button-secondary" type="button">Kiểm tra lại</button>
+            <button id="create-kiotviet" class="button button-danger" type="button" disabled>Thử tạo phiếu nháp</button>
+          </div>
+          <div id="kiotviet-message" class="message hidden" role="status"></div>
+        </article>
+      </section>
+    </main>
+
+    <footer><span>Sharon Bakery AI Inventory</span><span>YOLO26s · Image size 1280</span></footer>
+  </body>
+</html>

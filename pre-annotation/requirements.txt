@@ -1,0 +1,5 @@
+ultralytics
+https://github.com/ultralytics/CLIP/archive/refs/heads/main.zip
+opencv-python
+numpy
+tqdm

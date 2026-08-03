@@ -1,0 +1,48 @@
+{
+  "source_file": "NVL.xlsx",
+  "source_sheet": "Sheet1",
+  "source_columns": {
+    "sku": "ID Nguyên liệu",
+    "vietnamese_name": "Tên NVL (Tiếng Việt)",
+    "english_name": "Item (English)"
+  },
+  "notes": [
+    "SKU separators '-' and '_' are treated as equivalent.",
+    "MangBocThucPham is matched by Vietnamese item name because the model label uses OF_0004 while NVL.xlsx lists it as OF-0007.",
+    "Simple English fallbacks are used when Item (English) is blank in NVL.xlsx.",
+    "The NVL.xlsx typo 'Unsated butter' is corrected to 'UnsaltedButter' for display."
+  ],
+  "classes": {
+    "BK_0007_BoLatPilot": "BoLatPilot_UnsaltedButter",
+    "CH_0006_SocolaCompoundTrang": "SocolaCompoundTrang_WhiteChocolateCompound",
+    "FL_0002_BotCake": "BotCake_CakeFlour",
+    "FL_0004_BotAtta": "BotAtta_AttaFlour",
+    "FL_0011_BotCustard": "BotCustard_CustardPowder",
+    "FL_0013_BotXanhLa": "BotXanhLa_GreenFlour",
+    "FL_0014_BotCam": "BotCam_OrangeFlour",
+    "FV_0002_CaRot_Bich": "CaRot_Bich_Carrot",
+    "FV_0002_CaRot_Cu": "CaRot_Cu_Carrot",
+    "FV_0003_Chuoi_Trai": "Chuoi_Trai_Banana",
+    "ISO_OF_0012_BaoRac": "BaoRac_TrashBags",
+    "ISO_PA_0020_BaoBanhCuonMem": "BaoBanhCuonMem_SoftRollCakeBag",
+    "ISO_PA_0029_CuonDayThungNho": "CuonDayThungNho_SmallTwineRoll",
+    "ISO_SN_0010_BanhCracker": "BanhCracker_Cracker",
+    "JM_0007_MutPhuBanh": "MutPhuBanh_Glaze",
+    "OF_0001_VimVeSinh": "VimVeSinh_ToiletLiquid",
+    "OF_0003_NuocRuaChen": "NuocRuaChen_DishwashingLiquid",
+    "OF_0004_MangBocThucPham": "MangBocThucPham_WrapFood",
+    "OF_0004_NuocRuaTay": "NuocRuaTay_HandWashLiquid",
+    "OF_0008_NuocLavie": "NuocLavie_Water",
+    "OF_0009_GiayVS": "GiayVS_ToiletPaper",
+    "OF_0010_GiayBep": "GiayBep_KitchenPaper",
+    "OF_0011_GiayNen": "GiayNen_BakingPaper",
+    "OF_0013_GangTay": "GangTay_Gloves",
+    "PA_0014_NapBanhKemTron": "NapBanhKemTron_RoundCakeLid",
+    "PW_0010_CafeBot_Bich": "CafeBot_Bich_CoffeePowder",
+    "PW_0010_CafeBot_Hu": "CafeBot_Hu_CoffeePowder",
+    "PW_0015_BotNoi": "BotNoi_BakingPowder",
+    "SN_0019_Oreo": "Oreo_Cookie",
+    "YE_0003_MenTrang": "MenTrang_WhiteInstantYeast",
+    "ISO_YE_0003_MenTrang": "MenTrang_WhiteInstantYeast"
+  }
+}

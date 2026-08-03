@@ -1,0 +1,92 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python environments and caches
+.venv/
+**/.venv/
+**/.venv-*/
+venv/
+**/venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+**/.runtime/
+**/runs/
+
+# Node and Cloudflare local state
+node_modules/
+**/node_modules/
+.wrangler/
+.dev.vars
+cloudflared/
+
+# Runtime data and generated outputs
+runtime/
+backend/runtime/
+outputs/
+report/
+sample_image.jpg
+*.log
+*.tmp
+*.temp
+
+# Obsolete local backup
+backend - Copy/
+
+# Training datasets and generated annotations
+data/
+pre-annotation/Batch*/
+pre-annotation/products_preannotation/
+pre-annotation/weights/
+pre-annotation/**/*.jpg
+pre-annotation/**/*.jpeg
+pre-annotation/**/*.png
+
+sharon-cv-pipeline/usable_for_YOLO/
+sharon-cv-pipeline/unusable_images/
+sharon-cv-pipeline/demo/
+sharon-cv-pipeline/weights/
+sharon-cv-pipeline/**/models/
+sharon-cv-pipeline/triage_results.jsonl
+sharon-cv-pipeline/**/app_backup*.py
+sharon-cv-pipeline/**/app_before_*.py
+sharon-cv-pipeline/**/*.jpg
+sharon-cv-pipeline/**/*.jpeg
+sharon-cv-pipeline/**/*.png
+!sharon-cv-pipeline/samples/
+!sharon-cv-pipeline/samples/*.jpg
+!sharon-cv-pipeline/samples/*.jpeg
+!sharon-cv-pipeline/samples/*.png
+
+# Large model/archive artifacts are external, except production backend models
+*.pt
+*.onnx
+*.zip
+*.7z
+*.rar
+*.mp4
+*.avi
+*.mov
+!backend/models/*.pt
+!backend/models/*.onnx
+
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*~

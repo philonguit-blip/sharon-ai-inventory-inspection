@@ -1,0 +1,34 @@
+{
+  "classes": {
+    "PA-CRO-0000054_MiniCroissant_Baked": {
+      "product_code": "PA-CRO-0000054",
+      "product_name": "Bánh nhiều lớp - Viennoiserie - Mini Croissant (Baked)",
+      "confidence_threshold": 0.55,
+      "purchase_price": 0
+    },
+    "PA-CRO-0000054_MiniCroissant_Bakedd": {
+      "product_code": "PA-CRO-0000054",
+      "product_name": "Bánh nhiều lớp - Viennoiserie - Mini Croissant (Baked)",
+      "confidence_threshold": 0.55,
+      "purchase_price": 0
+    },
+    "PA_CRO_0000054_MiniCroissant_Bakedd": {
+      "product_code": "PA-CRO-0000054",
+      "product_name": "Bánh nhiều lớp - Viennoiserie - Mini Croissant (Baked)",
+      "confidence_threshold": 0.55,
+      "purchase_price": 0
+    },
+    "MiniCroissant_Baked": {
+      "product_code": "PA-CRO-0000054",
+      "product_name": "Bánh nhiều lớp - Viennoiserie - Mini Croissant (Baked)",
+      "confidence_threshold": 0.55,
+      "purchase_price": 0
+    },
+    "MiniCroissant_Bakedd": {
+      "product_code": "PA-CRO-0000054",
+      "product_name": "Bánh nhiều lớp - Viennoiserie - Mini Croissant (Baked)",
+      "confidence_threshold": 0.55,
+      "purchase_price": 0
+    }
+  }
+}
