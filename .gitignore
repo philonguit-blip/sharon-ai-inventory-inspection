@@ -45,30 +45,27 @@ sample_image.jpg
 # Obsolete local backup
 backend - Copy/
 
+# Legacy local-only pipelines retained outside the production repository
+/pre-annotation/
+/sharon-cv-pipeline/
+/AI_Inventory_Inspection_System_Tai_Lieu_Chi_Tiet.pdf
+/class_name.csv
+/r2_storage.py
+/test_supabase.py
+/start_tunnel.bat
+/backend/app/services/yolo_service.py
+/backend/models/export.py
+/backend/models/yolov8n.pt
+/backend/models/yolov8n.onnx
+/backend/requirements.txt
+/n8n/N8N_INTEGRATION.md
+/n8n/Workflow 1_*.json
+/n8n/Workflow 2_*.json
+/n8n/Workflow 3_*.json
+/n8n/Workflow 4_ Sharon Bakery R2 Intake.json
+
 # Training datasets and generated annotations
 data/
-pre-annotation/Batch*/
-pre-annotation/products_preannotation/
-pre-annotation/weights/
-pre-annotation/**/*.jpg
-pre-annotation/**/*.jpeg
-pre-annotation/**/*.png
-
-sharon-cv-pipeline/usable_for_YOLO/
-sharon-cv-pipeline/unusable_images/
-sharon-cv-pipeline/demo/
-sharon-cv-pipeline/weights/
-sharon-cv-pipeline/**/models/
-sharon-cv-pipeline/triage_results.jsonl
-sharon-cv-pipeline/**/app_backup*.py
-sharon-cv-pipeline/**/app_before_*.py
-sharon-cv-pipeline/**/*.jpg
-sharon-cv-pipeline/**/*.jpeg
-sharon-cv-pipeline/**/*.png
-!sharon-cv-pipeline/samples/
-!sharon-cv-pipeline/samples/*.jpg
-!sharon-cv-pipeline/samples/*.jpeg
-!sharon-cv-pipeline/samples/*.png
 
 # Large model/archive artifacts are external, except production backend models
 *.pt
@@ -79,8 +76,7 @@ sharon-cv-pipeline/**/*.png
 *.mp4
 *.avi
 *.mov
-!backend/models/*.pt
-!backend/models/*.onnx
+!backend/models/best_YOLO26s_PROD_1_SKU_v4.pt
 
 # Operating-system and editor files
 .DS_Store

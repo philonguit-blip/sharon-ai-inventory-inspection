@@ -1,72 +1,49 @@
-# Hệ thống AI Kiểm kê Kho (AI Inventory Inspection System)
+# Sharon Bakery AI Inventory
 
-Hệ thống Computer Vision tự động hóa quy trình kiểm kê kho, giám sát hàng hóa và đồng bộ dữ liệu hạ tầng cho SharonBakery.
+[![CI](https://github.com/philonguit-blip/sharon-ai-inventory-inspection/actions/workflows/ci.yml/badge.svg)](https://github.com/philonguit-blip/sharon-ai-inventory-inspection/actions/workflows/ci.yml)
 
-> **Triển khai hiện tại (03/08/2026):** hệ thống dùng n8n webhook và worker local
-> chủ động kết nối ra ngoài, không còn phụ thuộc Cloudflare Tunnel cho luồng kiểm
-> đếm bánh. Xem [N8N_OUTBOUND_WORKER.md](N8N_OUTBOUND_WORKER.md). Phần hướng dẫn
-> Tunnel bên dưới chỉ còn dành cho pipeline video cũ/tương thích ngược.
+Hệ thống web kiểm đếm sản phẩm bánh từ ảnh, tổng hợp số lượng, tạo file Excel
+và chuẩn bị phiếu nhập nháp KiotViet. Giao diện production:
 
-## Vận hành hằng ngày sau khi bật lại máy
+<https://sharon-bakery-inventory.pages.dev/>
 
-Luồng kiểm đếm hiện tại cần hai tiến trình trên máy AI: FastAPI và outbound
-worker. Không cần chạy Cloudflare Tunnel.
+## Kiến trúc production
 
-### Cách nhanh nhất trên Windows
-
-1. Mở thư mục dự án:
-
-   ```text
-   C:\Users\SHARON-AI\Downloads\SharonBakery_AI_documents\sharon-AI-inventory-inspection
-   ```
-
-2. Nhấp đúp `start_backend.bat` và giữ cửa sổ này mở. Chờ thấy:
-
-   ```text
-   Uvicorn running on http://127.0.0.1:8080
-   ```
-
-3. Nhấp đúp `start_worker.bat` và giữ cửa sổ này mở. Worker sẽ chủ động kết
-   nối đến n8n; không mở cổng Internet vào máy.
-
-4. Mở giao diện ở một trong hai địa chỉ:
-
-   - Máy AI: `http://127.0.0.1:8080`
-   - Máy khác/điện thoại: `https://sharon-bakery-inventory.pages.dev/`
-
-5. Đăng nhập bằng `APP_AUTH_USERNAME` và `APP_AUTH_PASSWORD` trong
-   `backend/.env`. Không gửi file `.env` hoặc chụp màn hình mật khẩu.
-
-6. Kiểm tra góc trên bên phải phải hiện **Hệ thống sẵn sàng** trước khi chọn
-   ảnh.
-
-### Chạy bằng PowerShell nếu không dùng file BAT
-
-Terminal 1 — backend:
-
-```powershell
-cd C:\Users\SHARON-AI\Downloads\SharonBakery_AI_documents\sharon-AI-inventory-inspection\backend
-.\.venv\Scripts\Activate.ps1
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8080
+```mermaid
+flowchart LR
+    Browser["Website / điện thoại"] --> N8N["n8n webhook queue"]
+    Browser --> R2["Cloudflare R2"]
+    Worker["Outbound worker trên máy AI"] --> N8N
+    Worker --> API["FastAPI local"]
+    API --> Model["YOLO production"]
+    API --> R2
+    API --> KV["KiotViet draft"]
 ```
 
-Terminal 2 — worker:
+- Website được triển khai trên Cloudflare Pages.
+- Ảnh đi thẳng từ trình duyệt lên R2 bằng URL có thời hạn.
+- n8n chỉ giữ metadata, hàng đợi và trạng thái xử lý.
+- Worker trên máy AI chủ động kết nối ra n8n; không cần tunnel hoặc mở cổng vào máy.
+- FastAPI xử lý ảnh bằng model production và cập nhật tiến độ sau từng ảnh.
 
-```powershell
-cd C:\Users\SHARON-AI\Downloads\SharonBakery_AI_documents\sharon-AI-inventory-inspection
-.\start_worker.bat
-```
+## Thành phần repository
 
-Không truy cập `http://0.0.0.0:8080`; đây chỉ là địa chỉ bind. Không đóng hai
-cửa sổ terminal trong lúc cửa hàng còn sử dụng hệ thống.
+| Đường dẫn | Nội dung |
+|---|---|
+| `backend/app` | FastAPI, AI inference, R2, KiotViet và n8n gateway |
+| `backend/frontend` | Giao diện Cloudflare Pages |
+| `backend/models` | Model YOLO production hiện tại |
+| `backend/templates` | Mẫu Excel phiếu nhập |
+| `backend/tests` | Unit test và smoke test |
+| `n8n` | Workflow outbound production, generator và test |
+| `.github/workflows` | Kiểm thử tự động trên GitHub Actions |
+| `docs` | Tài liệu quản lý artifact |
 
-### Tắt hệ thống đúng cách
+Dataset, pipeline video cũ, công cụ huấn luyện/pre-annotation, model thử nghiệm,
+runtime, log và credential không thuộc repository production. Xem
+[`docs/ARTIFACTS.md`](docs/ARTIFACTS.md).
 
-Nhấn `Ctrl+C` trong cửa sổ worker, sau đó nhấn `Ctrl+C` trong cửa sổ backend.
-Nếu Windows tắt hoặc khởi động lại đột ngột, các job đang chạy sẽ được đánh dấu
-`ERROR` và cần gửi lại bộ ảnh.
-
-### Cấu hình vận hành hiện tại
+## Cấu hình hiện tại
 
 | Cấu hình | Giá trị |
 |---|---:|
@@ -74,373 +51,115 @@ Nếu Windows tắt hoặc khởi động lại đột ngột, các job đang ch
 | Dung lượng tối đa mỗi ảnh | 50 MB |
 | Tổng dung lượng mỗi lượt | 160 MB |
 | Confidence tối thiểu | 0.55 |
-| IOU | 0.50 |
+| IoU | 0.50 |
 | Kích thước suy luận | 1280 px |
+| Worker truyền R2 song song | 4 luồng |
 
-Ảnh được upload thẳng từ trình duyệt lên Cloudflare R2. n8n chỉ giữ metadata,
-hàng đợi và trạng thái; outbound worker tải ảnh về máy AI, xử lý tuần tự để giữ
-độ ổn định, đồng thời cập nhật tiến độ `1/N`, `2/N` sau từng ảnh.
+Suy luận YOLO vẫn chạy tuần tự theo ảnh để giữ ổn định CPU/RAM và kết quả.
+Frontend hiển thị tiến độ thực tế `1/N`, `2/N` sau từng ảnh.
 
-### Kiểm tra và khắc phục nhanh
+## Chạy hằng ngày trên máy AI
 
-- **Outbound AI worker is offline:** kiểm tra `start_worker.bat` còn chạy và
-  máy AI không ở chế độ Sleep.
-- **Không mở được local:** kiểm tra backend có báo cổng 8080 đang được dùng hay
-  không; chỉ chạy một backend.
-- **Job đứng lâu:** xem `backend/runtime/jobs/<job_id>/job.json`; nếu timestamp
-  không đổi, dừng worker rồi backend, sau đó khởi động lại theo đúng thứ tự.
-- **Job not found:** tải lại trang. Frontend sẽ tự chờ và gửi lại cùng job theo
-  cơ chế idempotent.
-- **Đổi mật khẩu:** phải cập nhật đồng thời `APP_AUTH_PASSWORD` trong `.env` và
-  credential Basic Auth của workflow n8n, rồi restart backend và worker.
-- **Máy khác vẫn thấy cấu hình cũ:** nhấn `Ctrl+F5` hoặc đóng tab rồi mở lại URL
-  Pages.
+Sau khi bật máy:
 
-### Bảo mật credential
+1. Chạy `start_backend.bat` một lần.
+2. Chờ dòng `Uvicorn running on http://127.0.0.1:8080`.
+3. Chạy `start_worker.bat` một lần.
+4. Giữ cả hai cửa sổ mở.
+5. Mở local tại <http://127.0.0.1:8080> hoặc mở website production.
+6. Chỉ upload khi giao diện báo **Hệ thống sẵn sàng**.
 
-- Chỉ giữ credential thật trong `backend/.env`; không gửi file này qua email/chat và
-  không đưa vào workflow JSON hoặc mã nguồn.
-- Các file workflow cũ và bản sao `.env` trong repository đã được thay credential bằng
-  `REDACTED_ROTATE_REQUIRED`. Không dùng những file này để chạy production.
-- Nếu repository từng được chia sẻ ra ngoài, hãy tạo khóa R2 mới, cập nhật
-  `R2_ACCESS_KEY_ID`/`R2_SECRET_ACCESS_KEY`, kiểm tra upload thành công rồi mới thu hồi
-  khóa cũ để tránh làm gián đoạn hệ thống.
+Không truy cập `http://0.0.0.0:8080`; đây chỉ là địa chỉ bind. Nếu báo
+`WinError 10048`, backend đã chạy sẵn và không cần mở thêm lần nữa.
 
-### Cài lại môi trường khi `.venv` bị mất
+Khi tắt hệ thống, nhấn `Ctrl+C` ở worker trước rồi đến backend.
+
+## Cài đặt trên máy mới
+
+Yêu cầu Python 3.12 và Git:
 
 ```powershell
-cd C:\Users\SHARON-AI\Downloads\SharonBakery_AI_documents\sharon-AI-inventory-inspection\backend
+git clone https://github.com/philonguit-blip/sharon-ai-inventory-inspection.git
+cd sharon-ai-inventory-inspection\backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements-milestone2.txt
+Copy-Item .env.example .env
 ```
 
-Sau khi sửa giao diện trong `backend/frontend`, triển khai lại Cloudflare Pages:
+Điền credential thật vào `backend/.env`. Đồng bộ
+`APP_AUTH_USERNAME`/`APP_AUTH_PASSWORD` với credential Basic Auth của workflow
+n8n trước khi khởi động.
+
+Chạy thủ công nếu không dùng file BAT:
 
 ```powershell
-cd C:\Users\SHARON-AI\Downloads\SharonBakery_AI_documents\sharon-AI-inventory-inspection
-npx --yes wrangler@4.30.0 pages deploy backend\frontend --project-name sharon-bakery-inventory --branch main
-```
-
----
-
-# 1. Kiến trúc hệ thống (System Architecture)
-
-Hệ thống được thiết kế theo kiến trúc microservices nhẹ, giao tiếp thông qua webhook và RESTful API.
-
-## Các thành phần chính
-
-### ChatOps Interface
-- **Telegram API**
-- Giao diện tương tác thời gian thực để gửi ảnh và nhận báo cáo.
-
-### Orchestration Layer
-- **n8n**
-- Điều phối workflow, ETL pipeline và tự động hóa quy trình Purchase Order.
-
-### Storage Layer
-- **Cloudflare R2** → Lưu trữ ảnh gốc
-- **Supabase / PostgreSQL** → Lưu dữ liệu kiểm kê
-
-### AI Inference Layer
-- **FastAPI**
-- **Ultralytics YOLOv8**
-- **ONNX Runtime**
-
-Chức năng:
-- Phát hiện vật thể
-- Phân loại sản phẩm
-- Tổng hợp số lượng
-
-### Network Layer
-- **Cloudflare Zero Trust Tunnel**
-- Cung cấp kết nối bảo mật từ bên ngoài vào FastAPI nội bộ
-
----
-
-# 2. Điều kiện tiên quyết (Prerequisites)
-
-Đảm bảo môi trường triển khai có sẵn các thành phần sau:
-
-## Môi trường runtime
-- Python 3.10+
-- Node.js (nếu chạy n8n local)
-- Hoặc tài khoản n8n Cloud
-
-## Hạ tầng
-- Cloudflared CLI
-- Tài khoản Supabase
-- Tài khoản Cloudflare R2
-
----
-
-# 3. Hướng dẫn triển khai (Deployment Guide)
-
----
-
-## 3.1 Thiết lập cơ sở dữ liệu (Supabase Setup)
-
-1. Truy cập **Supabase Dashboard**
-2. Chọn project
-3. Mở **SQL Editor**
-4. Chạy đoạn SQL sau:
-
-```sql
-CREATE TABLE inventory_records (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('Asia/Ho_Chi_Minh', NOW()),
-    telegram_user_id BIGINT NOT NULL,
-    raw_image_url TEXT NOT NULL,
-    object_class TEXT NOT NULL,
-    quantity INTEGER NOT NULL
-);
-````
-
-Sau khi tạo xong:
-
-Vào:
-
-```text
-Project Settings → API
-```
-
-Lấy các thông tin:
-
-* Project URL
-* Service Role Secret
-
----
-
-## 3.2 Triển khai AI Backend (FastAPI)
-
-Di chuyển vào thư mục backend:
-
-```bash
+# Terminal 1
 cd backend
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8080
+
+# Terminal 2, từ thư mục gốc repository
+.\start_worker.bat
 ```
 
-### Tạo môi trường ảo
+## n8n production
 
-**Windows**
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-**Linux/macOS**
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### Cài đặt dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### Chuẩn bị model AI
-
-Đảm bảo file model nằm đúng vị trí:
+Workflow nguồn:
 
 ```text
-models/yolov8n.onnx
+n8n/Workflow 4_ Sharon Bakery Outbound Worker.json
 ```
 
-### Khởi động FastAPI
+Các endpoint production gồm upload init/status, submit, job status, worker next,
+worker result, heartbeat và health. Khi sửa generator, tái tạo JSON và chạy test:
 
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+```powershell
+node n8n\generate_workflow4_outbound.mjs
+node n8n\test_workflow4_outbound.mjs
 ```
 
-### Kiểm tra trạng thái hệ thống
+Xem hướng dẫn chi tiết tại [`N8N_OUTBOUND_WORKER.md`](N8N_OUTBOUND_WORKER.md).
 
-```text
-http://localhost:8080/health
+## Kiểm thử
+
+```powershell
+cd backend
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py" -v
+cd ..
+node n8n\test_workflow4_outbound.mjs
+node --check n8n\generate_workflow4_outbound.mjs
+node --check backend\frontend\assets\app.js
 ```
 
----
+GitHub Actions tự chạy các kiểm tra trên mỗi push và pull request vào `main`.
 
-## 3.3 Thiết lập Cloudflare Tunnel
+## Triển khai frontend
 
-Expose server local để n8n có thể gọi được:
-
-```bash
-cloudflared tunnel --url http://127.0.0.1:8080
+```powershell
+npx --yes wrangler@4.30.0 pages deploy backend\frontend `
+  --project-name sharon-bakery-inventory `
+  --branch main
 ```
 
-Sau khi chạy, copy URL:
-
-```text
-https://xxxxx.trycloudflare.com
-```
-
-URL này sẽ dùng cho node HTTP Request trong n8n.
-
----
-
-## 3.4 Thiết lập workflow n8n
-
-Mở giao diện n8n.
-
-### Cấu hình Credentials
-
-#### Telegram API
-
-Nhập:
-
-* Bot Token
-
-#### Cloudflare R2
-
-Nhập:
-
-* Access Key
-* Secret Key
-* Endpoint URL
-
-#### Supabase API
-
-Nhập:
-
-* Host URL
-* Service Role Secret
-
----
-
-### Import workflow
-
-Import file JSON workflow vào canvas n8n.
-
----
-
-### Cập nhật endpoint backend
-
-Trong node HTTP Request:
-
-```text
-https://<cloudflare-tunnel-url>/api/v1/predict
-```
-
----
-
-### Kích hoạt workflow
-
-Bật chế độ Active để workflow bắt đầu chạy.
-
----
-
-# 4. Quy trình thu thập dữ liệu & huấn luyện (Data Collection & Training SOP)
-
-Hiện tại hệ thống đang sử dụng model COCO pre-trained.
-
-Để fine-tune theo SKU đặc thù của SharonBakery:
-
----
-
-## Quay video baseline
-
-Thực hiện:
-
-```text
-10 giây / SKU
-```
-
-Mục tiêu:
-
-* Lấy đặc trưng hình dạng chuẩn
-* Tạo dữ liệu sạch
-
----
-
-## Quay video ngữ cảnh thực tế
-
-Thực hiện:
-
-```text
-15 giây / khu vực kệ hoặc pallet
-```
-
-Mục tiêu:
-
-* Thu dữ liệu che khuất (occlusion)
-* Thu bố cục thực tế
-* Thu dữ liệu môi trường thật
-
----
-
-## Trích xuất khung hình
-
-Sử dụng FFmpeg:
-
-```bash
-ffmpeg -i input.mp4 -vf fps=2 output_%04d.jpg
-```
-
----
-
-## Quy chuẩn gán nhãn (Annotation)
-
-Sử dụng multi-class bounding box.
-
-Nguyên tắc:
-
-* Gán nhãn tất cả sản phẩm nhìn thấy
-* Bounding box ôm sát vật thể
-* Giữ lại các mẫu khó
-* Giữ lại các trường hợp che khuất dưới 80%
-* Giữ nguyên ngữ cảnh shelf clutter
-
----
-
-# 5. Các vấn đề hiện tại (Known Issues)
-
-## Tích hợp Microsoft Teams
-
-Hiện tại đang dùng Telegram làm giải pháp tạm thời do việc xác thực webhook nội bộ với Microsoft Teams chưa ổn định.
-
-Cần triển khai:
-
-* Azure Bot Service
-* Microsoft Graph API ổn định hơn
-
----
-
-## Truy cập web từ xa
-
-Giao diện vận hành đã được triển khai tại:
-
-```text
-https://sharon-bakery-inventory.pages.dev/
-```
-
-Luồng từ xa dùng Cloudflare Pages + webhook n8n + outbound worker. FastAPI
-không cần mở cổng internet và không còn phụ thuộc vào Quick Tunnel. Trên máy AI
-cần chạy đồng thời backend và `start_worker.bat`; xem hướng dẫn chi tiết trong
-`N8N_OUTBOUND_WORKER.md`.
-
----
-
-# 6. Lộ trình tiếp theo (Next Steps)
-
-## Nâng cấp AI
-
-* Huấn luyện model YOLOv8 custom cho hơn 40 SKU
-* Tăng độ chính xác inference
-
-## Tích hợp OCR
-
-* Thêm OCR để xác thực chéo nhãn sản phẩm
-
-## Hạ tầng
-
-* Docker hóa toàn bộ hệ thống
-* Theo dõi heartbeat và cảnh báo khi outbound worker ngừng hoạt động
-
-## Vận hành
-
-* Thực thi OPS-001 để harden deployment
-* Chuẩn hóa môi trường production
+Sau triển khai, kiểm tra version asset trong `backend/frontend/index.html` và
+hard refresh trình duyệt nếu máy khác vẫn thấy giao diện cũ.
+
+## Khắc phục nhanh
+
+- **Worker offline:** kiểm tra `start_worker.bat`, kết nối Internet và chế độ Sleep.
+- **Không mở được local:** xác nhận chỉ có một backend dùng cổng 8080.
+- **Job not found:** tải lại trang; frontend sẽ thử lại theo cơ chế idempotent.
+- **Job đứng lâu:** kiểm tra `backend/runtime/jobs/<job_id>/job.json`, sau đó restart
+  worker rồi backend nếu timestamp không thay đổi.
+- **Đổi mật khẩu:** cập nhật đồng thời `.env` và credential n8n, sau đó restart cả
+  backend lẫn worker.
+
+## Bảo mật
+
+- Không commit `backend/.env`, token, signed URL hoặc credential nhà cung cấp.
+- Chỉ dùng `backend/.env.example` làm mẫu.
+- Repository production là private.
+- Khi nghi ngờ lộ credential, xoay khóa tại nhà cung cấp trước khi cập nhật hệ thống.
+
+Xem quy trình chi tiết tại [`SECURITY.md`](SECURITY.md).

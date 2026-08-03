@@ -1,14 +1,13 @@
 # External data and model artifacts
 
-The Git repository contains application source, n8n workflow definitions,
-documentation, tests, templates, and the production backend models required by
-the current bakery-counting service.
+The Git repository contains only the current bakery web application, production
+n8n outbound workflow, documentation, tests, template, and production model.
 
 Large or generated assets are intentionally excluded from Git:
 
 - raw and processed datasets under `data/`;
-- training images, generated annotations, and review queues;
-- experiment checkpoints and non-production model weights;
+- training utilities, images, generated annotations, and review queues;
+- experiment checkpoints, legacy ONNX/video models, and non-production weights;
 - demo videos, runtime jobs, logs, generated reports, and R2 artifacts;
 - Python virtual environments and local Cloudflare state.
 

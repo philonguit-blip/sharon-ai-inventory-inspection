@@ -1,9 +1,8 @@
-"""Bakery-specific YOLO inference, independent from Streamlit and legacy APIs.
+"""Production YOLO inference for the Sharon Bakery inventory workflow.
 
-This service is intentionally separate from ``yolo_service.py``.  The legacy
-service processes videos with the COCO ONNX model, while this module handles
-uploaded bakery images with the production PyTorch model and converts every
-model class to a KiotViet product through ``product_mapping.json``.
+This service handles uploaded bakery images with the production PyTorch model
+and converts every model class to a KiotViet product through
+``product_mapping.json``.
 """
 
 from __future__ import annotations

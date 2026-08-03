@@ -7,3 +7,8 @@ runtime/
 .pytest_cache/
 .git/
 .gitignore
+app/services/yolo_service.py
+models/yolov8n.pt
+models/yolov8n.onnx
+models/export.py
+requirements.txt
