@@ -125,6 +125,30 @@ class N8nOrchestratorServiceTests(unittest.IsolatedAsyncioTestCase):
             await service.close()
         self.assertEqual(context.exception.status_code, 502)
 
+    async def test_confirm_job_posts_job_id_and_confirmation(self):
+        async def handler(request: httpx.Request) -> httpx.Response:
+            self.assertEqual(request.url.path, "/webhook/bakery-confirm")
+            self.assertEqual(
+                request.read(),
+                b'{"confirm":true,"product_code":"SKU-1","job_id":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}',
+            )
+            return httpx.Response(200, json={"status": "CONFIRMING"})
+
+        service = N8nOrchestratorService(
+            "https://n8n.example/webhook",
+            "gateway",
+            "secret",
+            transport=httpx.MockTransport(handler),
+        )
+        try:
+            response = await service.confirm_job(
+                "a" * 32,
+                {"confirm": True, "product_code": "SKU-1"},
+            )
+        finally:
+            await service.close()
+        self.assertEqual(response["status"], "CONFIRMING")
+
 
 if __name__ == "__main__":
     unittest.main()

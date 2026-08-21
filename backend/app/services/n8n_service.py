@@ -126,3 +126,18 @@ class N8nOrchestratorService:
         return await self._request_json(
             "GET", f"bakery-job-status?job_id={job_id}"
         )
+
+    async def confirm_job(
+        self,
+        job_id: str,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        request_payload = dict(payload)
+        request_payload["job_id"] = job_id
+        response = await self._request_json(
+            "POST",
+            "bakery-confirm",
+            json_body=request_payload,
+        )
+        self._raise_workflow_error(response)
+        return response

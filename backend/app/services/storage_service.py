@@ -17,9 +17,12 @@ from app.config import (
 try:
     import boto3
     from botocore.config import Config
+    from botocore.exceptions import BotoCoreError, ClientError
 except ImportError:
     boto3 = None
     Config = None
+    BotoCoreError = None
+    ClientError = None
 
 
 class StorageError(RuntimeError):
@@ -29,7 +32,7 @@ class StorageError(RuntimeError):
 class R2StorageService:
     def __init__(self) -> None:
         if boto3 is None or Config is None:
-            raise StorageError("boto3 is not installed; install requirements-milestone2.txt.")
+            raise StorageError("boto3 is not installed; install backend/requirements.txt.")
         missing = [
             name
             for name, value in {
@@ -127,7 +130,22 @@ class R2StorageService:
         try:
             response = self.client.head_object(Bucket=self.bucket, Key=object_key)
         except Exception as exc:
-            raise StorageError(f"R2 object not found: {object_key}.") from exc
+            if ClientError is not None and isinstance(exc, ClientError):
+                error = exc.response.get("Error", {})
+                error_code = str(error.get("Code") or "")
+                status_code = int(
+                    exc.response.get("ResponseMetadata", {}).get(
+                        "HTTPStatusCode", 0
+                    )
+                    or 0
+                )
+                if error_code in {"404", "NoSuchKey", "NotFound"} or status_code == 404:
+                    raise StorageError(
+                        f"R2 object not found: {object_key}."
+                    ) from exc
+            raise StorageError(
+                f"Cannot inspect R2 object metadata: {object_key}."
+            ) from exc
         return {
             "object_key": object_key,
             "size": int(response.get("ContentLength") or 0),

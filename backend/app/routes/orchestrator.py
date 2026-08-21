@@ -23,6 +23,14 @@ def _service(request: Request) -> N8nOrchestratorService:
     return service
 
 
+def _validate_job_id(job_id: str) -> None:
+    if len(job_id) != 32 or any(
+        character not in "0123456789abcdef"
+        for character in job_id
+    ):
+        raise HTTPException(status_code=422, detail="Invalid job ID.")
+
+
 async def _call(operation) -> dict[str, Any]:
     try:
         return await operation
@@ -57,6 +65,17 @@ async def orchestrator_submit_job(
 
 @router.get("/jobs/{job_id}")
 async def orchestrator_job_status(job_id: str, request: Request) -> dict[str, Any]:
-    if len(job_id) != 32 or any(character not in "0123456789abcdef" for character in job_id):
-        raise HTTPException(status_code=422, detail="Invalid job ID.")
+    _validate_job_id(job_id)
     return await _call(_service(request).job_status(job_id))
+
+
+@router.post("/jobs/{job_id}/confirm")
+async def orchestrator_confirm_job(
+    job_id: str,
+    payload: dict[str, Any],
+    request: Request,
+) -> dict[str, Any]:
+    _validate_job_id(job_id)
+    return await _call(
+        _service(request).confirm_job(job_id, payload)
+    )

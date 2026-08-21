@@ -1,0 +1,129 @@
+PRODUCTION SNAPSHOT 27-SKU — 2026-08-20
+=======================================
+
+- Promoted `best_YOLO26s_2429_27SKUs.pt` (SHA256 recorded in MODEL_MANIFEST).
+- Synchronized 27 visual classes, 37 mapped business SKUs and 50 supported products.
+- Rebuilt Foundation artifact: 713 vectors, 384 dimensions, 40 registry keys.
+- Added missing references for 1500g Multiseed, COMMON Baguette Mini and COMMON Burger No Sesame.
+- Added safe Foundation reference export modes: original, white background and recommended mixed `both`; source images are never overwritten.
+- Integrated the same SAM white-background preview/download and atomic activation flow into the Foundation Streamlit Test Lab.
+- Added mixed image/video Foundation pre-annotation with bounded FPS sampling, blur/pHash filtering and video lineage manifests in the exported ZIP.
+- Default mode AUTO; 50 images/job, 50 MB/image, 200 MB/batch.
+- Historical entries below are retained for audit only and do not describe current production.
+
+SHARON BAKERY HYBRID CONSOLIDATION — 2026-08-11
+================================================
+
+CHANGED FILES
+1. backend/app/services/product_mapping_service.py
+   - fully supports schema-v2 direct/family mappings
+   - exposes 18 YOLO SKUs plus 1 Foundation-only SKU (19 supported products)
+   - resolves any operator-selected productCode safely
+
+2. backend/app/services/bakery_inference_service.py
+   - mixed YOLO classes no longer become AMBIGUOUS only because purity < 0.90
+   - class with the most boxes wins; count = boxes of that dominant class
+   - minority-box count/purity warning retained for audit
+   - annotated JPEG default quality reduced 92 -> 85 (smaller R2 artifacts)
+
+3. backend/app/routes/local_jobs.py
+   - same-SKU multi-image batch uses box-majority class evidence instead of hard class intersection
+   - total count sums each image's dominant-class count
+   - exposes product_catalog (19 supported products) to the web
+   - class disagreement inside a declared same-SKU batch becomes manual REVIEW
+   - allows operator product override for DIRECT/FAMILY/REVIEW, but only to a trained SKU
+   - quantity remains editable
+   - R2 incoming originals are reused instead of uploaded a second time
+
+4. frontend/index.html
+   - inference-mode selector (YOLO default fast path)
+   - class correction/typeahead UI
+   - FAMILY/REVIEW support "Khác"
+   - editable confirmed quantity
+   - explains client-side image optimization
+
+5. frontend/assets/app.js
+   - client resize/compress before presign/upload: max long side 1920 px, JPEG quality 0.86
+   - preprocessing concurrency 2, R2 upload concurrency remains 4
+   - default inference mode YOLO for batch speed; AUTO/Foundation/Compare remain selectable
+   - autocomplete against all 19 supported products on every typed character
+   - DIRECT class can be corrected too
+   - FAMILY/REVIEW has "Khác" -> global product search
+   - confirmation always sends product_code + editable quantity
+
+6. frontend/assets/styles.css
+   - autocomplete and correction UI styles
+
+7. n8n/Workflow 4_ Sharon Bakery Outbound Worker.json
+   - embeds the new frontend
+   - preserves inference_mode through PRESIGN -> PROCESS
+   - CONFIRM accepts DIRECT/FAMILY/REVIEW and editable quantity
+   - validates product override against product_catalog
+
+ADDITIONAL CHANGES
+- product_mapping.json now contains the Foundation-only operator catalog entry
+- hybrid_inference_service.py / foundation_inference_service.py
+- queue_worker.py (already supports PRESIGN / PROCESS / CONFIRM)
+- storage_service.py / excel_service.py / kiotviet_service.py
+- config.py (R2_TRANSFER_WORKERS stays 1 due Windows TLS stability note)
+
+DEPLOY
+1. Replace the three backend Python files above.
+2. Restart backend + worker so the new Python code/model pipeline is loaded.
+3. Import/replace n8n with `Workflow 4_ Sharon Bakery Outbound Worker.json` and re-check Basic Auth credential.
+4. If serving standalone frontend too, replace index.html/app.js/styles.css.
+5. Activate n8n and hard-refresh the browser.
+
+VALIDATION
+- Python py_compile: PASS
+- 14 YOLO visual classes / 18 YOLO SKUs / 19 supported products: PASS
+- 3 family classes: PASS
+- minimum threshold 0.02: PASS
+- app.js Node syntax: PASS
+- app.js DOM ID consistency: PASS
+- CSS brace balance: PASS
+- n8n JSON parse + every Code-node JS syntax: PASS
+
+FOUNDATION COUNTING CORRECTION — 2026-08-11
+===========================================
+
+- SAM receives a max-1280px copy; DINO crops and annotations retain original pixels.
+- Default prompt stride changed 64 -> 96 (256 prompts -> about 130 on a 4:3 image).
+- DINO now validates every SAM candidate against the selected tray class.
+- Added instance similarity 0.60, instance margin 0.02 and median-area 0.35x–2.50x gates.
+- Added semantic box-coverage suppression (0.45) for partial/background masks covering one object.
+- Final count now uses only retained instances; per-instance confidence/margin is auditable in JSON.
+- Converted 12 BR-GF-00000155 full-frame references to reviewed tight crops; originals archived.
+- Rebuilt reference_embeddings.npz: 332 vectors, 384 dimensions, 15 visual classes.
+- Added scripts/prepare_foundation_references.py and six focused Foundation tests.
+
+VALIDATION
+- Real single-product reflective-tray image: correct SKU, count 1 (previous intermediate count 2).
+- Real timing on CPU: SAM about 14.5s, total cold run about 23.1s (old PDF baseline 87.9s).
+- Backend tests: 47 passed.
+- Production verifier + n8n workflow simulation: PASS.
+
+HYBRID REVIEW COUNT CORRECTION — 2026-08-11
+===========================================
+
+- REVIEW now pre-fills count/objects from the strongest safe candidate.
+- A safe Foundation DIRECT result is preferred over a conflicting YOLO FAMILY result.
+- Canonical annotated image is copied from the same engine supplying the review count.
+- Batch totals exclude AMBIGUOUS/unsafe per-image counts instead of claiming to exclude them while still adding them.
+- Regression on PDF job 2ef30a...: per-image 1 unsafe + 4 YOLO + 6 Foundation; safe batch total is 10, excluded unsafe count is 1.
+
+FOUNDATION WHITE-BACKGROUND EDGE CORRECTION — 2026-08-20
+========================================================
+
+- Auto-crop now separates localisation from foreground extraction: a colour
+  proposal may choose the crop, but an aligned high-quality SAM mask supplies
+  the white-background silhouette.
+- Tight references use multi-prompt SAM (box + point grid); colour masks are a
+  fallback instead of receiving preference over a valid SAM boundary.
+- Guarded Lab-colour GrabCut removes connected tray/shadow leakage only when an
+  aligned SAM silhouette is unavailable and fails safely on excessive erosion.
+- Streamlit preview reports cleanup ratios and warns before queueing references
+  that required a strong correction.
+- Added regression coverage for connected tray leakage and colour-to-SAM mask
+  replacement; real reflective-tray smoke test preserves the loaf and removes
+  the entire cast shadow.

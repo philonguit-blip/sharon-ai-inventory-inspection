@@ -171,6 +171,53 @@ class R2IntakeTests(unittest.TestCase):
         self.assertEqual(accepted.total_images, 2)
         self.assertEqual(len(tasks.tasks), 0)
 
+    def test_r2_batch_is_accepted_before_background_download(self):
+        job_id = "e" * 32
+        keys = [
+            f"purchase-intake/{job_id}/incoming/001_tray-1.jpg",
+            f"purchase-intake/{job_id}/incoming/002_tray-2.jpg",
+        ]
+        self._write_manifest(
+            job_id,
+            [
+                {
+                    "filename": f"tray-{index}.jpg",
+                    "safe_name": f"00{index}_tray-{index}.jpg",
+                    "content_type": "image/jpeg",
+                    "size_bytes": 123,
+                    "object_key": key,
+                }
+                for index, key in enumerate(keys, start=1)
+            ],
+        )
+        manifest = local_jobs._read_upload_manifest(job_id)
+        manifest["inference_mode"] = "AUTO"
+        local_jobs._write_json_atomic(local_jobs._manifest_path(job_id), manifest)
+        app_state = SimpleNamespace(
+            bakery_inference_service=object(),
+            r2_storage_service=FakeStorage({}),
+            bakery_startup_error="",
+        )
+        request = SimpleNamespace(app=SimpleNamespace(state=app_state))
+        tasks = BackgroundTasks()
+
+        accepted = local_jobs.create_job_from_r2(
+            CreateR2JobRequest(
+                job_id=job_id,
+                files=[R2JobFile(object_key=key) for key in keys],
+            ),
+            request,
+            tasks,
+        )
+
+        self.assertEqual(accepted.status, "QUEUED")
+        self.assertEqual(accepted.total_images, 2)
+        self.assertEqual(len(tasks.tasks), 1)
+        self.assertEqual(
+            tasks.tasks[0].func,
+            local_jobs._download_and_process_r2_job,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

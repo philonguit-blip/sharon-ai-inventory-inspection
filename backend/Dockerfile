@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Cài đặt đúng bộ thư viện của bakery image pipeline.
-COPY requirements-milestone1.txt requirements-milestone2.txt ./
-RUN pip install --no-cache-dir -r requirements-milestone2.txt
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Sao chép toàn bộ mã nguồn backend vào container
 COPY . .

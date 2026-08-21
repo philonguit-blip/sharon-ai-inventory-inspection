@@ -1,0 +1,874 @@
+{
+  "name": "Sharon Bakery - Outbound AI Worker Queue",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "sharon-bakery-inventory",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "980f56ff-bd29-4e23-aa6f-93e7ecbd3e58",
+      "name": "00a - Web UI",
+      "webhookId": "outbound-worker-002"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { html: \"<!doctype html>\\n<html lang=\\\"vi\\\">\\n  <head>\\n    <meta charset=\\\"utf-8\\\" />\\n    <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1\\\" />\\n    <meta name=\\\"description\\\" content=\\\"Đếm sản phẩm bakery và tạo phiếu nhập KiotViet.\\\" />\\n    <title>Sharon Bakery · AI Inventory</title>\\n    <style>\\n:root {\\n  --ink: #17201c;\\n  --muted: #66716b;\\n  --paper: #f7f5ef;\\n  --card: #fffefa;\\n  --line: #dddcd4;\\n  --green: #214e3b;\\n  --green-soft: #e8f0eb;\\n  --orange: #d86f37;\\n  --orange-dark: #b75327;\\n  --red: #ad392f;\\n  --shadow: 0 18px 50px rgba(35, 46, 39, 0.08);\\n  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \\\"Segoe UI\\\", sans-serif;\\n  color: var(--ink);\\n  background: var(--paper);\\n}\\n\\n* { box-sizing: border-box; }\\nbody { margin: 0; min-width: 320px; background: var(--paper); }\\nbutton, input { font: inherit; }\\nbutton, a { -webkit-tap-highlight-color: transparent; }\\n\\n.topbar {\\n  height: 76px;\\n  display: flex;\\n  align-items: center;\\n  justify-content: space-between;\\n  padding: 0 clamp(20px, 5vw, 72px);\\n  background: rgba(255, 254, 250, 0.94);\\n  border-bottom: 1px solid var(--line);\\n  position: sticky;\\n  top: 0;\\n  z-index: 20;\\n  backdrop-filter: blur(10px);\\n}\\n\\n.brand { color: var(--ink); text-decoration: none; display: flex; gap: 12px; align-items: center; }\\n.brand-mark { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; color: white; background: var(--green); font-family: Georgia, serif; font-size: 23px; }\\n.brand strong, .brand small { display: block; }\\n.brand strong { font-family: Georgia, serif; font-size: 18px; }\\n.brand small { color: var(--muted); letter-spacing: .12em; text-transform: uppercase; font-size: 9px; margin-top: 2px; }\\n.system-status { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--muted); }\\n.status-dot { width: 9px; height: 9px; border-radius: 50%; background: #c7a442; box-shadow: 0 0 0 4px #f3ead0; }\\n.system-status.ready .status-dot { background: #2e8b57; box-shadow: 0 0 0 4px #dcece3; }\\n.system-status.error .status-dot { background: var(--red); box-shadow: 0 0 0 4px #f1dedb; }\\n\\nmain { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }\\n.hero { padding: clamp(54px, 8vw, 96px) 0 44px; }\\n.eyebrow, .step-label { margin: 0 0 12px; color: var(--orange); font-size: 11px; letter-spacing: .18em; font-weight: 800; }\\n.hero h1 { max-width: 880px; margin: 0; font-family: Georgia, \\\"Times New Roman\\\", serif; font-size: clamp(42px, 6.7vw, 78px); font-weight: 500; line-height: .99; letter-spacing: -.035em; }\\n.hero-copy { max-width: 680px; margin: 26px 0 36px; color: var(--muted); font-size: 17px; line-height: 1.65; }\\n.pipeline { display: flex; align-items: center; gap: 15px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .07em; }\\n.pipeline span { white-space: nowrap; }\\n.pipeline b { color: var(--green); margin-right: 5px; }\\n.pipeline i { flex: 1; min-width: 22px; height: 1px; background: var(--line); }\\n\\n.workspace { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .75fr); gap: 24px; align-items: start; }\\n.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }\\n.upload-card, .guide-card, .result-card, .table-card, .image-card, .kiotviet-card { padding: clamp(22px, 3vw, 34px); }\\n.card-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 22px; }\\n.card-heading.compact { align-items: center; margin-bottom: 18px; }\\nh2, h3, p { margin-top: 0; }\\nh2 { margin-bottom: 0; font-family: Georgia, serif; font-size: 28px; font-weight: 500; }\\nh3 { margin-bottom: 0; font-size: 16px; }\\n.counter { padding: 7px 11px; border-radius: 99px; background: var(--green-soft); color: var(--green); font-size: 12px; font-weight: 700; }\\n\\n.drop-zone { text-align: center; padding: 36px 20px 24px; border: 1.5px dashed #acb5ae; border-radius: 14px; background: #fbfaf6; transition: .18s ease; cursor: pointer; }\\n.drop-zone:hover, .drop-zone:focus, .drop-zone.dragging { border-color: var(--orange); background: #fff8f2; outline: none; transform: translateY(-1px); }\\n.upload-icon { width: 50px; height: 50px; margin: 0 auto 14px; display: grid; place-items: center; border-radius: 50%; background: var(--green); color: white; font-size: 25px; }\\n.drop-zone h3 { font-size: 17px; margin-bottom: 6px; }\\n.drop-zone p, .drop-zone small { color: var(--muted); }\\n.drop-zone p { font-size: 13px; margin-bottom: 18px; }\\n.drop-zone small { display: block; margin-top: 16px; font-size: 11px; }\\n.picker-actions { display: flex; justify-content: center; gap: 9px; }\\n\\n.button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 17px; border-radius: 9px; border: 1px solid transparent; text-decoration: none; cursor: pointer; font-weight: 750; font-size: 13px; transition: .16s ease; }\\n.button:hover:not(:disabled) { transform: translateY(-1px); }\\n.button:disabled { opacity: .45; cursor: not-allowed; }\\n.button-primary { color: white; background: var(--green); }\\n.button-primary:hover:not(:disabled) { background: #163b2c; }\\n.button-secondary { color: var(--green); background: var(--green-soft); border-color: #c9dbd0; }\\n.button-ghost { color: var(--ink); background: white; border-color: var(--line); }\\n.button-danger { color: white; background: var(--orange-dark); }\\n.button-wide { width: 100%; margin-top: 20px; min-height: 48px; }\\n.text-button { border: 0; padding: 4px; color: var(--orange-dark); background: transparent; cursor: pointer; font-size: 12px; font-weight: 700; }\\n\\n.selection { margin-top: 18px; }\\n.selection-bar, .progress-copy { display: flex; justify-content: space-between; gap: 16px; align-items: center; font-size: 12px; color: var(--muted); }\\n.file-list { max-height: 180px; overflow: auto; margin: 10px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }\\n.file-list li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 2px; border-bottom: 1px solid var(--line); font-size: 12px; }\\n.file-list span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\\n.file-list span:last-child { flex: none; color: var(--muted); }\\n.progress-wrap { margin-top: 18px; }\\n.progress-copy strong { color: var(--ink); }\\n.progress-track { height: 7px; margin-top: 8px; overflow: hidden; border-radius: 99px; background: #e5e5df; }\\n.progress-track span { display: block; width: 0; height: 100%; background: var(--orange); transition: width .18s; }\\n\\n.tips { list-style: none; counter-reset: tips; padding: 0; margin: 24px 0; }\\n.tips li { position: relative; padding: 0 0 22px 42px; counter-increment: tips; }\\n.tips li::before { content: counter(tips); position: absolute; left: 0; top: -2px; width: 27px; height: 27px; display: grid; place-items: center; border: 1px solid #cbd4ce; border-radius: 50%; color: var(--green); font-size: 11px; font-weight: 800; }\\n.tips b, .tips span { display: block; }\\n.tips b { font-size: 13px; margin-bottom: 5px; }\\n.tips span { color: var(--muted); font-size: 12px; line-height: 1.55; }\\n.safety-note { display: flex; gap: 12px; padding: 15px; border-radius: 12px; background: var(--green-soft); color: var(--green); }\\n.safety-note > span { font-weight: 900; }\\n.safety-note p { margin: 0; font-size: 12px; line-height: 1.5; }\\n.safety-note b { display: block; margin-bottom: 2px; }\\n\\n.result-card, #results-section { margin-top: 24px; }\\n.result-state { display: flex; align-items: center; gap: 22px; }\\n.result-state p:last-child { color: var(--muted); margin: 8px 0 0; }\\n.spinner { width: 47px; height: 47px; flex: none; border: 4px solid #dce6df; border-top-color: var(--green); border-radius: 50%; animation: spin .8s linear infinite; }\\n@keyframes spin { to { transform: rotate(360deg); } }\\n.section-heading { display: flex; justify-content: space-between; align-items: end; margin: 46px 0 20px; }\\n.job-reference { color: var(--muted); font-family: ui-monospace, monospace; font-size: 11px; }\\n.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }\\n.metrics article { padding: 20px; background: var(--green); color: white; border-radius: 14px; }\\n.metrics span, .metrics strong { display: block; }\\n.metrics span { opacity: .7; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }\\n.metrics strong { margin-top: 9px; font-family: Georgia, serif; font-size: 30px; font-weight: 500; }\\n.table-card, .image-card, .kiotviet-card { margin-top: 18px; }\\n.table-scroll { overflow-x: auto; }\\ntable { width: 100%; border-collapse: collapse; min-width: 650px; }\\nth, td { padding: 14px 12px; border-bottom: 1px solid var(--line); text-align: left; }\\nth { color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }\\ntd { font-size: 13px; }\\n.number { text-align: right; }\\n.annotated-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }\\n.annotated-item { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #f3f1ea; }\\n.annotated-item img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; }\\n.annotated-item div { display: flex; justify-content: space-between; gap: 10px; padding: 11px; font-size: 11px; }\\n.annotated-item span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\\n.annotated-item span:last-child { flex: none; color: var(--green); font-weight: 800; }\\n.kiotviet-card { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; border-left: 5px solid var(--orange); }\\n.kiotviet-copy > p:not(.step-label) { color: var(--muted); margin: 10px 0 0; font-size: 13px; }\\n.kiotviet-copy .muted { font-size: 11px !important; }\\n.kiotviet-actions { display: flex; gap: 10px; }\\n.message { grid-column: 1 / -1; margin: 0; padding: 12px 14px; border-radius: 9px; background: var(--green-soft); color: var(--green); font-size: 12px; line-height: 1.5; }\\n.message-error { background: #f6e6e4; color: var(--red); }\\n.message-success { background: var(--green-soft); color: var(--green); }\\n\\n.decision-card {\\n  padding: clamp(22px, 3vw, 34px);\\n  margin-bottom: 18px;\\n}\\n.decision-head {\\n  display: flex;\\n  align-items: flex-start;\\n  justify-content: space-between;\\n  gap: 24px;\\n}\\n.decision-head h3 {\\n  margin: 6px 0 10px;\\n  font-family: Georgia, serif;\\n  font-size: 25px;\\n  font-weight: 500;\\n}\\n.decision-badge {\\n  display: inline-flex;\\n  margin: 0;\\n  padding: 6px 10px;\\n  border-radius: 999px;\\n  background: var(--green-soft);\\n  color: var(--green);\\n  font-size: 10px;\\n  font-weight: 850;\\n  letter-spacing: .12em;\\n}\\n.decision-badge[data-kind=\\\"family\\\"] {\\n  background: #fff0e6;\\n  color: var(--orange-dark);\\n}\\n.decision-badge[data-kind=\\\"ambiguous\\\"],\\n.decision-badge[data-kind=\\\"no_detection\\\"] {\\n  background: #f6e6e4;\\n  color: var(--red);\\n}\\n.decision-confidence {\\n  min-width: 132px;\\n  padding: 14px 16px;\\n  border: 1px solid var(--line);\\n  border-radius: 12px;\\n  text-align: right;\\n  background: #fbfaf6;\\n}\\n.decision-confidence span,\\n.decision-confidence strong {\\n  display: block;\\n}\\n.decision-confidence span {\\n  color: var(--muted);\\n  font-size: 10px;\\n  text-transform: uppercase;\\n  letter-spacing: .08em;\\n}\\n.decision-confidence strong {\\n  margin-top: 5px;\\n  color: var(--green);\\n  font-family: Georgia, serif;\\n  font-size: 25px;\\n  font-weight: 500;\\n}\\n.family-selection {\\n  margin-top: 22px;\\n  padding: 18px;\\n  border: 1px solid #e2d5c8;\\n  border-radius: 12px;\\n  background: #fff8f2;\\n}\\n.family-selection label {\\n  display: block;\\n  margin-bottom: 8px;\\n  font-size: 13px;\\n  font-weight: 800;\\n}\\n.family-selection select,\\n.family-selection input {\\n  width: 100%;\\n  min-height: 46px;\\n  padding: 0 12px;\\n  border: 1px solid #cfc9bd;\\n  border-radius: 9px;\\n  background: white;\\n  color: var(--ink);\\n  font: inherit;\\n}\\n.operation-controls {\\n  display: grid;\\n  gap: 7px;\\n  margin: 16px 0;\\n}\\n.operation-controls label { font-size: 12px; font-weight: 800; }\\n.operation-controls select {\\n  width: 100%;\\n  min-height: 44px;\\n  border: 1px solid #cfc9bd;\\n  border-radius: 9px;\\n  background: white;\\n  color: var(--ink);\\n  padding: 0 12px;\\n  font: inherit;\\n}\\n.operation-controls small { color: var(--muted); font-size: 11px; }\\n.family-selection small {\\n  display: block;\\n  margin-top: 8px;\\n  color: var(--muted);\\n  font-size: 11px;\\n  line-height: 1.5;\\n}\\n.decision-actions {\\n  display: flex;\\n  justify-content: flex-end;\\n  gap: 10px;\\n  margin-top: 22px;\\n}\\n.decision-card .message {\\n  margin-top: 18px;\\n}\\n.decision-metrics strong {\\n  overflow: hidden;\\n  text-overflow: ellipsis;\\n}\\n.annotated-placeholder {\\n  min-height: 170px;\\n  display: grid !important;\\n  place-items: center;\\n  padding: 20px !important;\\n  color: var(--muted);\\n  text-align: center;\\n  font-size: 12px !important;\\n}\\n\\n.hidden { display: none !important; }\\n\\nfooter { width: min(1180px, calc(100% - 32px)); margin: 60px auto 0; padding: 24px 0 38px; display: flex; justify-content: space-between; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }\\n\\n@media (max-width: 820px) {\\n  .pipeline { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }\\n  .pipeline i { display: none; }\\n  .workspace { grid-template-columns: 1fr; }\\n  .guide-card { order: -1; }\\n  .metrics { grid-template-columns: 1fr 1fr; }\\n  .kiotviet-card { grid-template-columns: 1fr; }\\n  .kiotviet-actions { flex-wrap: wrap; }\\n}\\n\\n\\n@media (max-width: 680px) {\\n  .decision-head {\\n    flex-direction: column;\\n  }\\n  .decision-confidence {\\n    width: 100%;\\n    text-align: left;\\n  }\\n  .decision-actions {\\n    flex-direction: column-reverse;\\n  }\\n  .decision-actions .button {\\n    width: 100%;\\n  }\\n}\\n\\n@media (max-width: 520px) {\\n  .topbar { height: 66px; padding: 0 16px; }\\n  .system-status span:last-child { display: none; }\\n  main { width: min(100% - 20px, 1180px); }\\n  .hero { padding-top: 42px; }\\n  .hero h1 { font-size: 40px; }\\n  .pipeline { grid-template-columns: 1fr; }\\n  .picker-actions, .kiotviet-actions { flex-direction: column; }\\n  .picker-actions .button, .kiotviet-actions .button { width: 100%; }\\n  .metrics { gap: 8px; }\\n  .metrics article { padding: 15px; }\\n  footer { width: calc(100% - 24px); flex-direction: column; gap: 8px; }\\n}\\n\\n/* Professional operations-dashboard refresh */\\n:root {\\n  --ink: #13251e;\\n  --muted: #64736c;\\n  --paper: #f3f6f4;\\n  --card: #ffffff;\\n  --line: #dce5e0;\\n  --green: #174d3a;\\n  --green-dark: #103b2d;\\n  --green-soft: #eaf3ef;\\n  --orange: #dd6b2f;\\n  --orange-dark: #bd5120;\\n  --shadow: 0 16px 45px rgba(21, 55, 42, 0.07);\\n  font-family: \\\"Segoe UI\\\", Arial, sans-serif;\\n}\\n\\nhtml { scroll-behavior: smooth; }\\nbody {\\n  background:\\n    radial-gradient(circle at 85% 8%, rgba(36, 112, 84, .08), transparent 23rem),\\n    var(--paper);\\n}\\n\\n.topbar {\\n  height: 72px;\\n  padding: 0 clamp(20px, 4.5vw, 76px);\\n  background: rgba(255, 255, 255, .94);\\n  border-bottom-color: rgba(23, 77, 58, .12);\\n}\\n\\n.brand-mark {\\n  width: 42px;\\n  height: 42px;\\n  border-radius: 11px;\\n  background: linear-gradient(145deg, #1c5a44, #123e2f);\\n  font: 800 13px/1 \\\"Segoe UI\\\", Arial, sans-serif;\\n  letter-spacing: -.04em;\\n  box-shadow: 0 8px 18px rgba(23, 77, 58, .2);\\n}\\n\\n.brand strong {\\n  font: 750 17px/1.1 \\\"Segoe UI\\\", Arial, sans-serif;\\n  letter-spacing: -.02em;\\n}\\n.brand small { font-size: 9px; font-weight: 700; color: #75827c; }\\n.header-meta { display: flex; align-items: center; gap: 18px; }\\n.branch-badge {\\n  padding: 7px 11px;\\n  border: 1px solid var(--line);\\n  border-radius: 8px;\\n  color: var(--green);\\n  background: #f8faf9;\\n  font-size: 11px;\\n  font-weight: 700;\\n}\\n.system-status { padding-left: 18px; border-left: 1px solid var(--line); font-weight: 600; }\\n\\nmain { width: min(1240px, calc(100% - 40px)); }\\n.hero { padding: clamp(42px, 6vw, 72px) 0 28px; }\\n.hero-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, .7fr); gap: clamp(40px, 7vw, 96px); align-items: center; }\\n.hero-content { min-width: 0; }\\n.eyebrow { display: flex; align-items: center; gap: 9px; margin-bottom: 17px; font-size: 10px; color: var(--orange-dark); }\\n.eyebrow span { width: 21px; height: 2px; background: var(--orange); }\\n.hero h1 {\\n  max-width: 820px;\\n  font: 760 clamp(42px, 5vw, 67px)/1.03 \\\"Segoe UI\\\", Arial, sans-serif;\\n  letter-spacing: -.055em;\\n  color: var(--ink);\\n}\\n.hero h1 em { color: var(--green); font-style: normal; font-weight: 520; }\\n.hero-copy { max-width: 680px; margin: 22px 0 24px; font-size: 16px; line-height: 1.65; }\\n.hero-actions { display: flex; align-items: center; gap: 18px; }\\n.hero-actions > span { max-width: 230px; color: var(--muted); font-size: 11px; line-height: 1.45; }\\n.hero-button { min-height: 46px; padding: 0 21px; box-shadow: 0 9px 20px rgba(23, 77, 58, .16); }\\n\\n.hero-panel {\\n  position: relative;\\n  overflow: hidden;\\n  padding: 22px;\\n  border: 1px solid rgba(255,255,255,.12);\\n  border-radius: 16px;\\n  background: linear-gradient(145deg, #184f3c, #10372b);\\n  color: white;\\n  box-shadow: 0 20px 45px rgba(19, 59, 45, .18);\\n}\\n.hero-panel::after { content: \\\"\\\"; position: absolute; width: 180px; height: 180px; right: -90px; top: -100px; border: 34px solid rgba(255,255,255,.04); border-radius: 50%; }\\n.hero-panel.unavailable { background: linear-gradient(145deg, #744139, #4f2d28); }\\n.hero-panel.unavailable .live-indicator { background: #ef9b88; box-shadow: 0 0 0 5px rgba(239,155,136,.14); }\\n.hero-panel-head { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,.13); }\\n.live-indicator { width: 11px; height: 11px; flex: none; border-radius: 50%; background: #72d39f; box-shadow: 0 0 0 5px rgba(114,211,159,.13); }\\n.hero-panel-head small, .hero-panel-head strong { display: block; }\\n.hero-panel-head small { margin-bottom: 3px; color: rgba(255,255,255,.55); font-size: 8px; font-weight: 800; letter-spacing: .16em; }\\n.hero-panel-head strong { font-size: 14px; }\\n.hero-panel dl { position: relative; z-index: 1; margin: 14px 0 0; }\\n.hero-panel dl div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; }\\n.hero-panel dt { color: rgba(255,255,255,.58); font-size: 11px; }\\n.hero-panel dd { margin: 0; font-size: 11px; font-weight: 750; }\\n\\n.pipeline {\\n  margin-top: 38px;\\n  padding: 16px 20px;\\n  border: 1px solid var(--line);\\n  border-radius: 13px;\\n  background: rgba(255,255,255,.7);\\n  box-shadow: 0 6px 18px rgba(21, 55, 42, .03);\\n}\\n.pipeline span { display: grid; grid-template-columns: 28px auto; grid-template-rows: auto auto; column-gap: 9px; text-transform: none; letter-spacing: 0; color: var(--ink); font-size: 12px; font-weight: 700; }\\n.pipeline span b { grid-row: 1 / 3; align-self: center; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: var(--green-soft); color: var(--green); font-size: 11px; }\\n.pipeline span small { color: var(--muted); font-size: 8px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }\\n.pipeline i { background: #cfdad4; }\\n\\n.workspace { gap: 18px; }\\n.card { border-color: var(--line); border-radius: 16px; box-shadow: var(--shadow); }\\n.upload-card, .guide-card, .result-card, .table-card, .image-card, .kiotviet-card { padding: clamp(22px, 2.7vw, 32px); }\\nh2 { font: 720 25px/1.2 \\\"Segoe UI\\\", Arial, sans-serif; letter-spacing: -.025em; }\\nh3 { font-weight: 720; }\\n.step-label { margin-bottom: 9px; font-size: 9px; }\\n.counter { border-radius: 8px; font-size: 11px; }\\n.drop-zone { padding: 29px 18px 20px; border-color: #aebfb6; background: #f8fbf9; }\\n.drop-zone:hover, .drop-zone:focus, .drop-zone.dragging { border-color: var(--green); background: #f1f8f4; }\\n.upload-icon { width: 44px; height: 44px; background: var(--green-soft); color: var(--green); font-size: 22px; }\\n.button { border-radius: 8px; }\\n.button-primary { background: linear-gradient(135deg, #1b5a43, #123f30); }\\n.guide-card { background: linear-gradient(180deg, #ffffff, #f9fbfa); }\\n.tips li::before { border-radius: 8px; background: var(--green-soft); border-color: transparent; font-weight: 800; }\\n.metrics article { background: linear-gradient(145deg, #1a533f, #123c2e); }\\n.kiotviet-card { border-left-width: 4px; }\\n\\n@media (max-width: 900px) {\\n  .hero-grid { grid-template-columns: 1fr; gap: 26px; }\\n  .hero-panel { display: grid; grid-template-columns: .8fr 1.2fr; gap: 18px; align-items: center; }\\n  .hero-panel-head { border-bottom: 0; padding-bottom: 0; }\\n  .hero-panel dl { display: grid; grid-template-columns: 1fr 1fr; margin: 0; }\\n  .hero-panel dl div { padding: 6px 0; }\\n}\\n\\n@media (max-width: 820px) {\\n  .pipeline { display: grid; grid-template-columns: 1fr 1fr; }\\n  .pipeline span { white-space: normal; }\\n}\\n\\n@media (max-width: 560px) {\\n  .branch-badge { display: none; }\\n  .header-meta { gap: 0; }\\n  .system-status { border-left: 0; padding-left: 0; }\\n  main { width: min(100% - 24px, 1240px); }\\n  .hero { padding-top: 34px; }\\n  .hero h1 { font-size: 40px; letter-spacing: -.045em; }\\n  .hero-actions { align-items: flex-start; flex-direction: column; gap: 10px; }\\n  .hero-panel { display: block; }\\n  .hero-panel dl { display: block; margin-top: 14px; }\\n  .pipeline { grid-template-columns: 1fr; margin-top: 26px; }\\n}\\n\\n/* Public static deployment: session-only Basic Auth for n8n webhooks. */\\n.remote-only,\\n.remote-session-only { display: none; }\\n\\nhtml.remote-mode:not(.authenticated) { overflow: hidden; }\\nhtml.remote-mode .remote-only {\\n  position: fixed;\\n  inset: 0;\\n  z-index: 1000;\\n  display: grid;\\n  place-items: center;\\n  padding: 20px;\\n  background:\\n    radial-gradient(circle at 80% 15%, rgba(42, 129, 96, .22), transparent 30rem),\\n    linear-gradient(145deg, #eef4f1, #dfeae5);\\n}\\nhtml.remote-mode.authenticated .remote-only { display: none; }\\nhtml.remote-mode.authenticated .remote-session-only { display: inline-flex; }\\nhtml.remote-mode .kiotviet-actions { display: none; }\\n\\n.auth-card {\\n  width: min(430px, 100%);\\n  padding: clamp(26px, 5vw, 40px);\\n  border: 1px solid rgba(23, 77, 58, .12);\\n  border-radius: 20px;\\n  background: rgba(255, 255, 255, .97);\\n  box-shadow: 0 28px 75px rgba(18, 62, 47, .18);\\n}\\n.auth-brand { display: grid; margin-bottom: 24px; }\\n.auth-card h1 {\\n  margin: 0;\\n  color: var(--ink);\\n  font: 750 30px/1.15 \\\"Segoe UI\\\", Arial, sans-serif;\\n  letter-spacing: -.035em;\\n}\\n.auth-copy { margin: 12px 0 24px; color: var(--muted); font-size: 13px; line-height: 1.6; }\\n.auth-card label { display: block; margin: 14px 0 6px; color: var(--ink); font-size: 12px; font-weight: 700; }\\n.auth-card input {\\n  width: 100%;\\n  height: 45px;\\n  padding: 0 12px;\\n  border: 1px solid #b9c9c1;\\n  border-radius: 8px;\\n  outline: none;\\n  background: #fbfdfc;\\n  color: var(--ink);\\n  font: inherit;\\n}\\n.auth-card input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23, 77, 58, .1); }\\n.auth-card .button { margin-top: 22px; }\\n.auth-card .message { margin-bottom: 0; }\\n#remote-logout { white-space: nowrap; }\\n\\n@media (max-width: 560px) {\\n  .auth-card { padding: 26px 20px; border-radius: 16px; }\\n  .auth-card h1 { font-size: 26px; }\\n  #remote-logout { font-size: 10px; }\\n}\\n\\n\\n/* v5: operator class correction + typeahead */\\n.product-override { position: relative; }\\n.product-suggestions {\\n  margin-top: 6px;\\n  max-height: 280px;\\n  overflow-y: auto;\\n  border: 1px solid #d6d1c8;\\n  border-radius: 10px;\\n  background: #fff;\\n  box-shadow: 0 14px 28px rgba(35, 46, 39, .12);\\n}\\n.product-suggestion {\\n  width: 100%;\\n  display: grid;\\n  gap: 3px;\\n  padding: 11px 12px;\\n  border: 0;\\n  border-bottom: 1px solid #ece8df;\\n  background: #fff;\\n  color: var(--ink);\\n  text-align: left;\\n  cursor: pointer;\\n}\\n.product-suggestion:last-child { border-bottom: 0; }\\n.product-suggestion:hover,\\n.product-suggestion:focus { background: var(--green-soft); outline: none; }\\n.product-suggestion strong { font-size: 12px; }\\n.product-suggestion span { font-size: 10px; color: var(--muted); }\\n#selected-product-summary.selected { color: var(--green); font-weight: 750; }\\n.quantity-confirmation { background: #f7faf8; }\\n.quantity-confirmation input { font-weight: 800; font-size: 18px; }\\n\\n/* Hidden developer control panel. It has no visible launcher; hold the SB mark\\n   or use Ctrl+Shift+D, then authenticate with the developer key. */\\n.developer-overlay {\\n  position: fixed;\\n  inset: 0;\\n  z-index: 1200;\\n  display: grid;\\n  place-items: center;\\n  padding: 20px;\\n  background: rgba(10, 29, 22, .72);\\n  backdrop-filter: blur(8px);\\n}\\n.developer-panel {\\n  width: min(900px, 100%);\\n  max-height: min(88vh, 860px);\\n  overflow: auto;\\n  padding: clamp(22px, 4vw, 34px);\\n  border: 1px solid rgba(255, 255, 255, .18);\\n  border-radius: 18px;\\n  background: #fff;\\n  box-shadow: 0 30px 90px rgba(0, 0, 0, .35);\\n}\\n.developer-head { display: flex; justify-content: space-between; gap: 24px; }\\n.developer-head h2 { margin-bottom: 8px; }\\n.developer-head p:last-child { margin: 0; color: var(--muted); font-size: 12px; }\\n.developer-close {\\n  width: 40px;\\n  height: 40px;\\n  flex: none;\\n  border: 1px solid var(--line);\\n  border-radius: 9px;\\n  background: #fff;\\n  color: var(--ink);\\n  cursor: pointer;\\n  font-size: 24px;\\n}\\n.developer-unlock { margin-top: 24px; }\\n.developer-unlock label,\\n#developer-config-form > label { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 800; }\\n.developer-unlock > div { display: flex; gap: 9px; }\\n.developer-unlock input,\\n#developer-model,\\n.developer-threshold-input {\\n  min-height: 43px;\\n  border: 1px solid #b9c9c1;\\n  border-radius: 8px;\\n  background: #fbfdfc;\\n  color: var(--ink);\\n  font: inherit;\\n}\\n.developer-unlock input { width: 100%; padding: 0 12px; }\\n#developer-config-form { margin-top: 24px; }\\n#developer-model { width: 100%; padding: 0 12px; }\\n.developer-table-wrap { max-height: 390px; overflow: auto; margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; }\\n.developer-table { min-width: 650px; }\\n.developer-table th { position: sticky; top: 0; z-index: 1; background: #f4f8f6; }\\n.developer-table td { padding: 9px 12px; }\\n.developer-threshold-input { width: 105px; padding: 0 10px; font-weight: 800; }\\n.developer-actions { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-top: 18px; }\\n.developer-actions span { color: var(--muted); font-size: 11px; }\\n#developer-message { margin: 18px 0 0; }\\n#developer-trigger { user-select: none; -webkit-user-select: none; }\\n\\n@media (max-width: 560px) {\\n  .developer-overlay { padding: 8px; }\\n  .developer-panel { max-height: 96vh; padding: 20px 15px; border-radius: 13px; }\\n  .developer-unlock > div, .developer-actions { align-items: stretch; flex-direction: column; }\\n  .developer-unlock .button, .developer-actions .button { width: 100%; }\\n}\\n\\n/* Public operator UI: no login gate. Worker-only webhooks remain protected. */\\n.remote-only,\\n.remote-session-only { display: none !important; }\\nhtml.remote-mode,\\nhtml.remote-mode:not(.authenticated) { overflow: auto !important; }\\n\\n</style>\\n<script>\\nwindow.SHARON_REMOTE_MODE = true;\\nwindow.SHARON_WEBHOOK_BASE = window.location.origin + \\\"/webhook\\\";\\ndocument.documentElement.classList.add(\\\"remote-mode\\\");\\n</script>\\n  </head>\\n  <body>\\n    <div id=\\\"remote-login\\\" class=\\\"auth-overlay remote-only\\\" role=\\\"dialog\\\" aria-modal=\\\"true\\\" aria-labelledby=\\\"remote-login-title\\\">\\n      <form id=\\\"remote-login-form\\\" class=\\\"auth-card\\\" onsubmit=\\\"return false;\\\">\\n        <span class=\\\"brand-mark auth-brand\\\">SB</span>\\n        <p class=\\\"step-label\\\">TRUY CẬP TỪ XA</p>\\n        <h1 id=\\\"remote-login-title\\\">Đăng nhập Sharon Bakery</h1>\\n        <p class=\\\"auth-copy\\\">Dùng tài khoản vận hành được cấp cho website kiểm đếm. Thiết bị này sẽ ghi nhớ đăng nhập cho đến khi bạn bấm Đăng xuất.</p>\\n        <label for=\\\"remote-username\\\">Tên đăng nhập</label>\\n        <input id=\\\"remote-username\\\" name=\\\"username\\\" type=\\\"text\\\" autocomplete=\\\"username\\\" required />\\n        <label for=\\\"remote-password\\\">Mật khẩu</label>\\n        <input id=\\\"remote-password\\\" name=\\\"password\\\" type=\\\"password\\\" autocomplete=\\\"current-password\\\" required />\\n        <button id=\\\"remote-login-submit\\\" class=\\\"button button-primary button-wide\\\" type=\\\"submit\\\">Đăng nhập</button>\\n        <p id=\\\"remote-login-error\\\" class=\\\"message message-error hidden\\\" role=\\\"alert\\\"></p>\\n      </form>\\n    </div>\\n\\n    <div id=\\\"developer-settings\\\" class=\\\"developer-overlay hidden\\\" role=\\\"dialog\\\" aria-modal=\\\"true\\\" aria-labelledby=\\\"developer-title\\\">\\n      <section class=\\\"developer-panel\\\">\\n        <div class=\\\"developer-head\\\">\\n          <div>\\n            <p class=\\\"step-label\\\">DEVELOPER ONLY</p>\\n            <h2 id=\\\"developer-title\\\">Model &amp; confidence settings</h2>\\n            <p>Chỉ áp dụng cho job mới. Job đang xử lý tiếp tục dùng cấu hình cũ.</p>\\n          </div>\\n          <button id=\\\"developer-close\\\" class=\\\"developer-close\\\" type=\\\"button\\\" aria-label=\\\"Đóng\\\">×</button>\\n        </div>\\n\\n        <form id=\\\"developer-unlock-form\\\" class=\\\"developer-unlock\\\" onsubmit=\\\"return false;\\\">\\n          <label for=\\\"developer-key\\\">Mã developer</label>\\n          <div>\\n            <input id=\\\"developer-key\\\" type=\\\"password\\\" autocomplete=\\\"off\\\" required />\\n            <button id=\\\"developer-load\\\" class=\\\"button button-primary\\\" type=\\\"submit\\\">Mở cấu hình</button>\\n          </div>\\n        </form>\\n\\n        <form id=\\\"developer-config-form\\\" class=\\\"hidden\\\" onsubmit=\\\"return false;\\\">\\n          <label for=\\\"developer-model\\\">Model đang sử dụng</label>\\n          <select id=\\\"developer-model\\\"></select>\\n          <div class=\\\"developer-table-wrap\\\">\\n            <table class=\\\"developer-table\\\">\\n              <thead><tr><th>Class</th><th>Tên hiển thị</th><th>Confidence</th></tr></thead>\\n              <tbody id=\\\"developer-threshold-rows\\\"></tbody>\\n            </table>\\n          </div>\\n          <div class=\\\"developer-actions\\\">\\n            <span id=\\\"developer-updated-at\\\"></span>\\n            <button id=\\\"developer-save\\\" class=\\\"button button-danger\\\" type=\\\"submit\\\">Kiểm tra và áp dụng</button>\\n          </div>\\n        </form>\\n        <p id=\\\"developer-message\\\" class=\\\"message hidden\\\" role=\\\"status\\\"></p>\\n      </section>\\n    </div>\\n\\n    <header class=\\\"topbar\\\">\\n      <a class=\\\"brand\\\" href=\\\"/\\\" aria-label=\\\"Sharon Bakery AI Inventory\\\">\\n        <span id=\\\"developer-trigger\\\" class=\\\"brand-mark\\\">SB</span>\\n        <span>\\n          <strong>Sharon Bakery</strong>\\n          <small>AI Inventory</small>\\n        </span>\\n      </a>\\n      <div class=\\\"header-meta\\\">\\n        <button id=\\\"remote-logout\\\" class=\\\"text-button remote-session-only\\\" type=\\\"button\\\">Đăng xuất</button>\\n        <span class=\\\"branch-badge\\\">Warehouse</span>\\n        <div id=\\\"system-status\\\" class=\\\"system-status\\\" aria-live=\\\"polite\\\">\\n          <span class=\\\"status-dot\\\"></span>\\n          <span>Đang kiểm tra hệ thống…</span>\\n        </div>\\n      </div>\\n    </header>\\n\\n    <main>\\n      <section class=\\\"hero\\\">\\n        <div class=\\\"hero-grid\\\">\\n          <div class=\\\"hero-content\\\">\\n            <p class=\\\"eyebrow\\\"><span></span> KIỂM KÊ NHẬP HÀNG BẰNG AI</p>\\n            <h1>Kiểm đếm chính xác.<br /><em>Nhập hàng nhanh hơn.</em></h1>\\n            <p class=\\\"hero-copy\\\">\\n              Tải một hoặc nhiều ảnh của cùng một loại bánh. Hệ thống nhận diện, kiểm đếm,\\n              kiểm tra độ nhất quán giữa các ảnh và chỉ tạo phiếu KiotViet sau khi bạn xác nhận.\\n            </p>\\n            <div class=\\\"hero-actions\\\">\\n              <a class=\\\"button button-primary hero-button\\\" href=\\\"#upload-panel\\\">Bắt đầu kiểm đếm</a>\\n              <span>AI kiểm đếm trước · Người dùng xác nhận trước khi tạo phiếu</span>\\n            </div>\\n          </div>\\n          <aside id=\\\"hero-panel\\\" class=\\\"hero-panel\\\" aria-label=\\\"Cấu hình hệ thống\\\">\\n            <div class=\\\"hero-panel-head\\\">\\n              <span class=\\\"live-indicator\\\"></span>\\n              <div><small>TRẠNG THÁI</small><strong id=\\\"hero-status-label\\\">Đang kiểm tra…</strong></div>\\n            </div>\\n            <dl>\\n              <div><dt>Mô hình</dt><dd>YOLO26s</dd></div>\\n              <div><dt>Kích thước ảnh YOLO</dt><dd>1024 px</dd></div>\\n              <div><dt>Đầu ra</dt><dd>Excel + R2</dd></div>\\n              <div><dt>KiotViet</dt><dd>Xác nhận thủ công · Lưu hoàn tất</dd></div>\\n            </dl>\\n          </aside>\\n        </div>\\n        <div class=\\\"pipeline\\\" aria-label=\\\"Quy trình xử lý\\\">\\n          <span><b>1</b><small>Chuẩn bị</small>Chọn ảnh</span>\\n          <i></i>\\n          <span><b>2</b><small>Xử lý</small>AI kiểm đếm</span>\\n          <i></i>\\n          <span><b>3</b><small>Xác nhận</small>Chọn SKU / duyệt count</span>\\n          <i></i>\\n          <span><b>4</b><small>Hoàn tất</small>Tạo phiếu KiotViet</span>\\n        </div>\\n      </section>\\n\\n      <section class=\\\"workspace\\\">\\n        <article id=\\\"upload-panel\\\" class=\\\"card upload-card\\\">\\n          <div class=\\\"card-heading\\\">\\n            <div>\\n              <p class=\\\"step-label\\\">BƯỚC 1</p>\\n              <h2>Chọn ảnh cần kiểm đếm</h2>\\n            </div>\\n            <span id=\\\"file-counter\\\" class=\\\"counter\\\">0 ảnh</span>\\n          </div>\\n\\n          <div id=\\\"drop-zone\\\" class=\\\"drop-zone\\\" tabindex=\\\"0\\\" role=\\\"button\\\" aria-label=\\\"Chọn ảnh tải lên\\\">\\n            <div class=\\\"upload-icon\\\" aria-hidden=\\\"true\\\">↑</div>\\n            <h3>Kéo và thả ảnh vào đây</h3>\\n            <p>hoặc chọn ảnh từ máy tính</p>\\n            <div class=\\\"picker-actions\\\">\\n              <button id=\\\"pick-files\\\" class=\\\"button button-secondary\\\" type=\\\"button\\\">Chọn ảnh</button>\\n              <button id=\\\"pick-folder\\\" class=\\\"button button-ghost\\\" type=\\\"button\\\">Chọn thư mục</button>\\n            </div>\\n            <input id=\\\"file-input\\\" type=\\\"file\\\" accept=\\\"image/jpeg,image/png,image/webp,image/bmp\\\" multiple hidden />\\n            <input id=\\\"folder-input\\\" type=\\\"file\\\" accept=\\\"image/jpeg,image/png,image/webp,image/bmp\\\" multiple webkitdirectory directory hidden />\\n            <small id=\\\"upload-limits\\\">JPG, PNG, WEBP hoặc BMP</small>\\n          </div>\\n\\n          <div id=\\\"selection\\\" class=\\\"selection hidden\\\">\\n            <div class=\\\"selection-bar\\\">\\n              <span id=\\\"selection-summary\\\"></span>\\n              <button id=\\\"clear-files\\\" class=\\\"text-button\\\" type=\\\"button\\\">Xóa tất cả</button>\\n            </div>\\n            <ul id=\\\"file-list\\\" class=\\\"file-list\\\"></ul>\\n          </div>\\n\\n          <div id=\\\"upload-progress\\\" class=\\\"progress-wrap hidden\\\" aria-live=\\\"polite\\\">\\n            <div class=\\\"progress-copy\\\"><span>Đang tải ảnh…</span><strong id=\\\"progress-value\\\">0%</strong></div>\\n            <div class=\\\"progress-track\\\"><span id=\\\"progress-bar\\\"></span></div>\\n          </div>\\n\\n          <div class=\\\"operation-controls\\\">\\n            <label for=\\\"inference-mode\\\">Chế độ xử lý</label>\\n            <select id=\\\"inference-mode\\\">\\n              <option value=\\\"YOLO\\\">YOLO — nhanh, khuyến nghị cho batch</option>\\n              <option value=\\\"AUTO\\\" selected>AUTO — YOLO + Foundation fallback khi cần</option>\\n              <option value=\\\"FOUNDATION\\\">FOUNDATION — chậm hơn, dùng để kiểm tra trường hợp khó</option>\\n              <option value=\\\"COMPARE\\\">COMPARE — chạy cả hai engine để đối chiếu</option>\\n            </select>\\n            <small>Ảnh lớn sẽ tự resize tối đa 1920 px và nén JPEG trước khi upload để giảm thời gian truyền dữ liệu.</small>\\n          </div>\\n\\n          <button id=\\\"start-job\\\" class=\\\"button button-primary button-wide\\\" type=\\\"button\\\" disabled>\\n            Bắt đầu kiểm đếm\\n          </button>\\n          <p id=\\\"upload-error\\\" class=\\\"message message-error hidden\\\" role=\\\"alert\\\"></p>\\n        </article>\\n\\n        <aside class=\\\"card guide-card\\\">\\n          <p class=\\\"step-label\\\">CHỤP ẢNH TỐT</p>\\n          <h2>Ba lưu ý để đếm chính xác</h2>\\n          <ol class=\\\"tips\\\">\\n            <li><b>Chụp thẳng từ trên xuống</b><span>Thấy trọn khay và không cắt mất sản phẩm.</span></li>\\n            <li><b>Ánh sáng đều, ảnh rõ nét</b><span>Tránh rung, bóng tối và vùng bị cháy sáng.</span></li>\\n            <li><b>Một job chỉ dùng một loại bánh</b><span>Có thể tải nhiều ảnh, nhưng tất cả ảnh phải cùng một class/family. Số lượng giữa các ảnh sẽ được cộng lại.</span></li>\\n          </ol>\\n          <div class=\\\"safety-note\\\">\\n            <span>✓</span>\\n            <p><b>Kiểm soát an toàn</b>AI không tự tạo phiếu. Bạn có thể sửa class và count trước khi xác nhận; mục “Khác” tìm trong toàn bộ 47 sản phẩm đang được hỗ trợ (37 SKU qua YOLO + 10 Foundation-only).</p>\\n          </div>\\n        </aside>\\n      </section>\\n\\n      <section id=\\\"processing-section\\\" class=\\\"card result-card hidden\\\" aria-live=\\\"polite\\\">\\n        <div class=\\\"result-state\\\">\\n          <span class=\\\"spinner\\\" aria-hidden=\\\"true\\\"></span>\\n          <div>\\n            <p class=\\\"step-label\\\">BƯỚC 2</p>\\n            <h2 id=\\\"processing-title\\\">AI đang kiểm đếm…</h2>\\n            <p id=\\\"processing-copy\\\">Đã xử lý 0/0 ảnh.</p>\\n          </div>\\n        </div>\\n      </section>\\n\\n      <section id=\\\"decision-section\\\" class=\\\"hidden\\\">\\n        <div class=\\\"section-heading\\\">\\n          <div>\\n            <p class=\\\"step-label\\\">BƯỚC 3</p>\\n            <h2>Xác nhận kết quả AI</h2>\\n          </div>\\n          <span id=\\\"decision-job-reference\\\" class=\\\"job-reference\\\"></span>\\n        </div>\\n\\n        <div class=\\\"metrics decision-metrics\\\">\\n          <article><span>Nhận diện</span><strong id=\\\"decision-class\\\">—</strong></article>\\n          <article><span>Tổng số lượng</span><strong id=\\\"decision-count\\\">0</strong></article>\\n          <article><span>Ảnh đã xử lý</span><strong id=\\\"decision-images\\\">0</strong></article>\\n          <article><span>Purity</span><strong id=\\\"decision-purity\\\">—</strong></article>\\n        </div>\\n\\n        <article class=\\\"card decision-card\\\">\\n          <div class=\\\"decision-head\\\">\\n            <div>\\n              <p id=\\\"decision-badge\\\" class=\\\"decision-badge\\\">AI RESULT</p>\\n              <h3 id=\\\"decision-title\\\">Đang chuẩn bị kết quả…</h3>\\n              <p id=\\\"decision-message\\\" class=\\\"muted\\\"></p>\\n            </div>\\n            <div class=\\\"decision-confidence\\\">\\n              <span>Confidence TB</span>\\n              <strong id=\\\"decision-confidence\\\">—</strong>\\n            </div>\\n          </div>\\n\\n          <div id=\\\"family-selection\\\" class=\\\"family-selection hidden\\\">\\n            <label id=\\\"family-selection-label\\\" for=\\\"family-sku-select\\\">Chọn SKU chính xác trong family</label>\\n            <select id=\\\"family-sku-select\\\">\\n              <option value=\\\"\\\">— Chọn SKU —</option>\\n            </select>\\n            <small id=\\\"family-selection-help\\\">AI chỉ xác định được family hình ảnh; hãy chọn đúng SKU con để gửi productCode sang KiotViet.</small>\\n          </div>\\n\\n          <div id=\\\"product-override\\\" class=\\\"family-selection product-override hidden\\\">\\n            <label for=\\\"product-search-input\\\">Sản phẩm xác nhận / chỉnh class</label>\\n            <input id=\\\"product-search-input\\\" type=\\\"search\\\" autocomplete=\\\"off\\\" placeholder=\\\"Nhập tên hoặc mã SKU…\\\" />\\n            <div id=\\\"product-suggestions\\\" class=\\\"product-suggestions hidden\\\" role=\\\"listbox\\\"></div>\\n            <small id=\\\"selected-product-summary\\\">Chưa chọn sản phẩm xác nhận.</small>\\n          </div>\\n\\n          <div class=\\\"family-selection quantity-confirmation\\\">\\n            <label for=\\\"confirmed-quantity\\\">Số lượng xác nhận</label>\\n            <input id=\\\"confirmed-quantity\\\" type=\\\"number\\\" min=\\\"1\\\" max=\\\"5000\\\" step=\\\"1\\\" inputmode=\\\"numeric\\\" />\\n            <small>Có thể sửa count AI trước khi gửi KiotViet.</small>\\n          </div>\\n\\n          <div class=\\\"family-selection document-type-confirmation\\\">\\n            <label for=\\\"document-type\\\">Loại phiếu cần tạo</label>\\n            <select id=\\\"document-type\\\">\\n              <option value=\\\"PURCHASE_RECEIPT\\\">Phiếu nhập hàng</option>\\n              <option value=\\\"MANUFACTURING\\\">Phiếu sản xuất</option>\\n            </select>\\n            <small>Phiếu nhập hàng được gộp theo ngày; phiếu sản xuất được tạo riêng qua dịch vụ RPA KiotViet.</small>\\n          </div>\\n\\n          <p id=\\\"confirmation-error\\\" class=\\\"message message-error hidden\\\" role=\\\"alert\\\"></p>\\n\\n          <div class=\\\"decision-actions\\\">\\n            <button id=\\\"retake-job\\\" class=\\\"button button-ghost\\\" type=\\\"button\\\">Chụp / tải lại ảnh</button>\\n            <button id=\\\"confirm-job\\\" class=\\\"button button-danger\\\" type=\\\"button\\\" disabled>Xác nhận và tạo phiếu nhập hàng</button>\\n          </div>\\n        </article>\\n\\n        <article class=\\\"card table-card\\\">\\n          <div class=\\\"card-heading compact\\\">\\n            <h3>Kết quả theo từng ảnh</h3>\\n            <span class=\\\"muted\\\">Các count bên dưới được cộng để tạo tổng số lượng của job.</span>\\n          </div>\\n          <div class=\\\"table-scroll\\\">\\n            <table>\\n              <thead>\\n                <tr>\\n                  <th>Ảnh</th>\\n                  <th class=\\\"number\\\">Count</th>\\n                  <th class=\\\"number\\\">Purity</th>\\n                  <th class=\\\"number\\\">Confidence TB</th>\\n                </tr>\\n              </thead>\\n              <tbody id=\\\"decision-image-rows\\\"></tbody>\\n            </table>\\n          </div>\\n        </article>\\n\\n        <article class=\\\"card image-card\\\">\\n          <div class=\\\"card-heading compact\\\"><h3>Ảnh đã nhận diện</h3></div>\\n          <div id=\\\"decision-annotated-grid\\\" class=\\\"annotated-grid\\\"></div>\\n        </article>\\n      </section>\\n\\n      <section id=\\\"results-section\\\" class=\\\"hidden\\\">\\n        <div class=\\\"section-heading\\\">\\n          <div>\\n            <p class=\\\"step-label\\\">BƯỚC 4</p>\\n            <h2>Hoàn tất nhập hàng</h2>\\n          </div>\\n          <span id=\\\"job-reference\\\" class=\\\"job-reference\\\"></span>\\n        </div>\\n\\n        <div class=\\\"metrics\\\">\\n          <article><span>Mặt hàng</span><strong id=\\\"metric-products\\\">0</strong></article>\\n          <article><span>Tổng số lượng</span><strong id=\\\"metric-quantity\\\">0</strong></article>\\n          <article><span>Ảnh đã xử lý</span><strong id=\\\"metric-images\\\">0</strong></article>\\n          <article><span>Lưu trữ R2</span><strong id=\\\"metric-r2\\\">—</strong></article>\\n        </div>\\n\\n        <article class=\\\"card table-card\\\">\\n          <div class=\\\"card-heading compact\\\">\\n            <h3>Danh sách hàng nhập</h3>\\n            <a id=\\\"download-excel\\\" class=\\\"button button-secondary hidden\\\" href=\\\"#\\\" target=\\\"_blank\\\" rel=\\\"noopener\\\">Tải file Excel</a>\\n          </div>\\n          <div class=\\\"table-scroll\\\">\\n            <table>\\n              <thead><tr><th>Mã hàng</th><th>Tên hàng</th><th class=\\\"number\\\">Số lượng</th><th class=\\\"number\\\">Đơn giá</th></tr></thead>\\n              <tbody id=\\\"product-rows\\\"></tbody>\\n            </table>\\n          </div>\\n        </article>\\n\\n        <article class=\\\"card image-card\\\">\\n          <div class=\\\"card-heading compact\\\"><h3>Ảnh đã nhận diện</h3></div>\\n          <div id=\\\"annotated-grid\\\" class=\\\"annotated-grid\\\"></div>\\n        </article>\\n\\n        <article class=\\\"card kiotviet-card\\\">\\n          <div class=\\\"kiotviet-copy\\\">\\n            <p class=\\\"step-label\\\">KIOTVIET</p>\\n            <h2>Phiếu nhập nháp</h2>\\n            <p>Phiếu chỉ được tạo sau bước xác nhận ở trên. Backend xác thực productCode với KiotViet và lưu productId thực tế trước khi tạo phiếu.</p>\\n          </div>\\n          <div id=\\\"kiotviet-message\\\" class=\\\"message hidden\\\" role=\\\"status\\\"></div>\\n        </article>\\n      </section>\\n    </main>\\n\\n    <footer><span>Sharon Bakery AI Inventory</span><span>YOLO26s · Image size 1024</span></footer>\\n<script>\\nconst state = {\\n  files: [],\\n  health: null,\\n  jobId: null,\\n  pollTimer: null,\\n  currentJob: null,\\n  confirmationInProgress: false,\\n  selectionError: \\\"\\\",\\n  uploadInProgress: false,\\n  uploadMode: \\\"orchestrated\\\",\\n  inferenceMode: \\\"AUTO\\\",\\n  productCatalog: [],\\n  selectedProductCode: \\\"\\\",\\n  apiAuthorization: \\\"\\\",\\n  lastSubmitPayload: null,\\n  pollRetryCount: 0,\\n  terminalSyncRetryCount: 0,\\n  developerKey: \\\"\\\",\\n  developerSettings: null,\\n  developerBusy: false,\\n};\\n\\nconst remoteWebhookMode = window.SHARON_REMOTE_MODE === true;\\nconst orchestratorBase = String(\\n  window.SHARON_ORCHESTRATOR_BASE || \\\"/api/v1/orchestrator\\\",\\n).replace(/\\\\/$/, \\\"\\\");\\nconst webhookBase = String(\\n  window.SHARON_WEBHOOK_BASE || \\\"https://n8n.sharon-finefoods.com/webhook\\\",\\n).replace(/\\\\/$/, \\\"\\\");\\nconst activeJobStorageKey = \\\"sharon_inventory_active_job\\\";\\nconst remoteAuthStorageKey = \\\"sharon_inventory_remote_authorization\\\";\\nconst remoteUsernameStorageKey = \\\"sharon_inventory_remote_username\\\";\\n\\nif (remoteWebhookMode) {\\n  document.documentElement.classList.add(\\\"remote-mode\\\");\\n}\\n\\n/*\\n * n8n serves webhook HTML inside a sandboxed iframe.\\n * In that environment localStorage may be blocked because\\n * the iframe does not have allow-same-origin.\\n *\\n * Use localStorage when available. n8n's sandbox can either throw on access\\n * or expose storage that is discarded on the next navigation, so also mirror\\n * the values into window.name. window.name survives reloads in the same tab\\n * even when the document has an opaque/sandboxed origin.\\n */\\nconst fallbackStorage = new Map();\\nconst windowNameStoragePrefix = \\\"sharon_inventory_storage:\\\";\\n\\nfunction readWindowNameStorage() {\\n  const raw = String(window.name || \\\"\\\");\\n  if (!raw.startsWith(windowNameStoragePrefix)) return {};\\n  try {\\n    const parsed = JSON.parse(\\n      decodeURIComponent(raw.slice(windowNameStoragePrefix.length)),\\n    );\\n    return parsed && typeof parsed === \\\"object\\\" && !Array.isArray(parsed)\\n      ? parsed\\n      : {};\\n  } catch (_) {\\n    return {};\\n  }\\n}\\n\\nfunction writeWindowNameStorage(values) {\\n  try {\\n    window.name = `${windowNameStoragePrefix}${encodeURIComponent(JSON.stringify(values))}`;\\n  } catch (_) {\\n    // Keep the in-memory Map as a last-resort fallback for unusual browsers.\\n  }\\n}\\n\\nfunction getFallbackStorageItem(key) {\\n  const persisted = readWindowNameStorage();\\n  if (Object.prototype.hasOwnProperty.call(persisted, key)) {\\n    return String(persisted[key]);\\n  }\\n  return fallbackStorage.get(key) ?? null;\\n}\\n\\nfunction setFallbackStorageItem(key, value) {\\n  const stringValue = String(value);\\n  fallbackStorage.set(key, stringValue);\\n  const persisted = readWindowNameStorage();\\n  persisted[key] = stringValue;\\n  writeWindowNameStorage(persisted);\\n}\\n\\nfunction removeFallbackStorageItem(key) {\\n  fallbackStorage.delete(key);\\n  const persisted = readWindowNameStorage();\\n  if (!Object.prototype.hasOwnProperty.call(persisted, key)) return;\\n  delete persisted[key];\\n  if (Object.keys(persisted).length) writeWindowNameStorage(persisted);\\n  else window.name = \\\"\\\";\\n}\\n\\nconst safeStorage = {\\n  getItem(key) {\\n    try {\\n      const value = window.localStorage.getItem(key);\\n      return value ?? getFallbackStorageItem(key);\\n    } catch (_) {\\n      return getFallbackStorageItem(key);\\n    }\\n  },\\n\\n  setItem(key, value) {\\n    // Always mirror to window.name because sandboxed localStorage can appear\\n    // writable yet be cleared when the webhook document reloads.\\n    setFallbackStorageItem(key, value);\\n    try {\\n      window.localStorage.setItem(key, value);\\n    } catch (_) {}\\n  },\\n\\n  removeItem(key) {\\n    removeFallbackStorageItem(key);\\n    try {\\n      window.localStorage.removeItem(key);\\n    } catch (_) {}\\n  },\\n};\\n\\nconst r2UploadConcurrency = 4;\\nconst uploadMaxLongSide = 1600;\\nconst uploadJpegQuality = 0.86;\\nconst optimiseMinBytes = 1.5 * 1024 * 1024;\\nconst imageOptimiseConcurrency = (() => {\\n  const logicalCores = Number(navigator.hardwareConcurrency || 4);\\n  const deviceMemoryGb = Number(navigator.deviceMemory || 4);\\n  // Three simultaneous decodes are safe only on stronger phones/desktops.\\n  // Lower-memory devices stay at two to avoid browser tab eviction.\\n  return logicalCores >= 6 && deviceMemoryGb >= 6 ? 3 : 2;\\n})();\\nconst defaultMaxImagesPerJob = 50;\\nconst defaultMaxImageSizeMb = 50;\\nconst defaultMaxJobUploadSizeMb = 200;\\nconst defaultInferenceMode = \\\"AUTO\\\";\\nconst jobPollIntervalMs = 1200;\\nconst initialJobPollDelayMs = 1500;\\nconst maxTransientPollRetries = 20;\\nconst maxTerminalSyncRetries = 75;\\n\\nconst byId = (id) => document.getElementById(id);\\n\\n// Never leave credentials in the address bar/history if an older broken page\\n// submitted the login form with the browser's default GET behaviour.\\nconst currentUrl = new URL(window.location.href);\\nif (currentUrl.searchParams.has(\\\"username\\\") || currentUrl.searchParams.has(\\\"password\\\")) {\\n  currentUrl.searchParams.delete(\\\"username\\\");\\n  currentUrl.searchParams.delete(\\\"password\\\");\\n  window.history.replaceState({}, document.title, currentUrl.toString());\\n}\\n\\nconst elements = {\\n  systemStatus: byId(\\\"system-status\\\"),\\n  fileInput: byId(\\\"file-input\\\"),\\n  folderInput: byId(\\\"folder-input\\\"),\\n  dropZone: byId(\\\"drop-zone\\\"),\\n  fileCounter: byId(\\\"file-counter\\\"),\\n  selection: byId(\\\"selection\\\"),\\n  selectionSummary: byId(\\\"selection-summary\\\"),\\n  fileList: byId(\\\"file-list\\\"),\\n  startJob: byId(\\\"start-job\\\"),\\n  inferenceMode: byId(\\\"inference-mode\\\"),\\n  uploadProgress: byId(\\\"upload-progress\\\"),\\n  progressValue: byId(\\\"progress-value\\\"),\\n  progressBar: byId(\\\"progress-bar\\\"),\\n  uploadError: byId(\\\"upload-error\\\"),\\n  processingSection: byId(\\\"processing-section\\\"),\\n  processingTitle: byId(\\\"processing-title\\\"),\\n  processingCopy: byId(\\\"processing-copy\\\"),\\n  decisionSection: byId(\\\"decision-section\\\"),\\n  decisionJobReference: byId(\\\"decision-job-reference\\\"),\\n  decisionClass: byId(\\\"decision-class\\\"),\\n  decisionCount: byId(\\\"decision-count\\\"),\\n  decisionImages: byId(\\\"decision-images\\\"),\\n  decisionPurity: byId(\\\"decision-purity\\\"),\\n  decisionBadge: byId(\\\"decision-badge\\\"),\\n  decisionTitle: byId(\\\"decision-title\\\"),\\n  decisionMessage: byId(\\\"decision-message\\\"),\\n  decisionConfidence: byId(\\\"decision-confidence\\\"),\\n  familySelection: byId(\\\"family-selection\\\"),\\n  familySelectionLabel: byId(\\\"family-selection-label\\\"),\\n  familySelectionHelp: byId(\\\"family-selection-help\\\") || byId(\\\"family-selection\\\")?.querySelector(\\\"small\\\"),\\n  familySkuSelect: byId(\\\"family-sku-select\\\"),\\n  confirmedQuantity: byId(\\\"confirmed-quantity\\\"),\\n  documentType: byId(\\\"document-type\\\"),\\n  productOverride: byId(\\\"product-override\\\"),\\n  productSearchInput: byId(\\\"product-search-input\\\"),\\n  productSuggestions: byId(\\\"product-suggestions\\\"),\\n  selectedProductSummary: byId(\\\"selected-product-summary\\\"),\\n  confirmationError: byId(\\\"confirmation-error\\\"),\\n  confirmJob: byId(\\\"confirm-job\\\"),\\n  retakeJob: byId(\\\"retake-job\\\"),\\n  decisionImageRows: byId(\\\"decision-image-rows\\\"),\\n  decisionAnnotatedGrid: byId(\\\"decision-annotated-grid\\\"),\\n  resultsSection: byId(\\\"results-section\\\"),\\n  kiotvietMessage: byId(\\\"kiotviet-message\\\"),\\n  remoteLogin: byId(\\\"remote-login\\\"),\\n  remoteLoginForm: byId(\\\"remote-login-form\\\"),\\n  remoteUsername: byId(\\\"remote-username\\\"),\\n  remotePassword: byId(\\\"remote-password\\\"),\\n  remoteLoginSubmit: byId(\\\"remote-login-submit\\\"),\\n  remoteLoginError: byId(\\\"remote-login-error\\\"),\\n  remoteLogout: byId(\\\"remote-logout\\\"),\\n  developerOverlay: byId(\\\"developer-settings\\\"),\\n  developerTrigger: byId(\\\"developer-trigger\\\"),\\n  developerClose: byId(\\\"developer-close\\\"),\\n  developerUnlockForm: byId(\\\"developer-unlock-form\\\"),\\n  developerKey: byId(\\\"developer-key\\\"),\\n  developerLoad: byId(\\\"developer-load\\\"),\\n  developerConfigForm: byId(\\\"developer-config-form\\\"),\\n  developerModel: byId(\\\"developer-model\\\"),\\n  developerThresholdRows: byId(\\\"developer-threshold-rows\\\"),\\n  developerSave: byId(\\\"developer-save\\\"),\\n  developerUpdatedAt: byId(\\\"developer-updated-at\\\"),\\n  developerMessage: byId(\\\"developer-message\\\"),\\n};\\n\\nfunction formatBytes(bytes) {\\n  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;\\n  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;\\n}\\n\\nfunction imageContentType(file) {\\n  const declared = String(file?.type || \\\"\\\").toLowerCase();\\n  if ([\\\"image/jpeg\\\", \\\"image/png\\\", \\\"image/webp\\\", \\\"image/bmp\\\"].includes(declared)) {\\n    return declared;\\n  }\\n  const extension = String(file?.name || \\\"\\\").split(\\\".\\\").pop()?.toLowerCase();\\n  return {\\n    jpg: \\\"image/jpeg\\\",\\n    jpeg: \\\"image/jpeg\\\",\\n    png: \\\"image/png\\\",\\n    webp: \\\"image/webp\\\",\\n    bmp: \\\"image/bmp\\\",\\n  }[extension] || \\\"\\\";\\n}\\n\\n\\nfunction normaliseSearch(value) {\\n  return String(value || \\\"\\\")\\n    .normalize(\\\"NFD\\\")\\n    .replace(/[\\\\u0300-\\\\u036f]/g, \\\"\\\")\\n    .toLowerCase()\\n    .trim();\\n}\\n\\nfunction productLabel(product) {\\n  const name = product?.display_name || product?.product_name || product?.product_code || \\\"\\\";\\n  return `${name} · ${product?.product_code || \\\"\\\"}`;\\n}\\n\\nfunction catalogProduct(productCode) {\\n  const target = String(productCode || \\\"\\\").trim().toLowerCase();\\n  return state.productCatalog.find(\\n    (item) => String(item?.product_code || \\\"\\\").trim().toLowerCase() === target,\\n  ) || null;\\n}\\n\\nfunction updateConfirmEnabled() {\\n  const quantity = Number(elements.confirmedQuantity.value);\\n  const quantityValid = Number.isInteger(quantity) && quantity >= 1 && quantity <= 5000;\\n  const decisionType = String(state.currentJob?.decision?.decision || \\\"\\\").toUpperCase();\\n  const confirmable = [\\\"DIRECT\\\", \\\"FAMILY\\\", \\\"REVIEW\\\"].includes(decisionType);\\n  elements.confirmJob.disabled = !confirmable\\n    || !quantityValid\\n    || !state.selectedProductCode\\n    || state.confirmationInProgress;\\n}\\n\\nfunction selectConfirmedProduct(productCode, { updateInput = true } = {}) {\\n  const product = catalogProduct(productCode);\\n  state.selectedProductCode = product?.product_code || \\\"\\\";\\n  if (updateInput) {\\n    elements.productSearchInput.value = product ? productLabel(product) : \\\"\\\";\\n  }\\n  elements.selectedProductSummary.textContent = product\\n    ? `Sẽ xác nhận: ${productLabel(product)}`\\n    : \\\"Chưa chọn sản phẩm xác nhận.\\\";\\n  elements.selectedProductSummary.classList.toggle(\\\"selected\\\", Boolean(product));\\n  elements.productSuggestions.replaceChildren();\\n  elements.productSuggestions.classList.add(\\\"hidden\\\");\\n  updateConfirmEnabled();\\n}\\n\\nfunction renderProductSuggestions(query = \\\"\\\") {\\n  const needle = normaliseSearch(query);\\n  const matches = state.productCatalog\\n    .filter((item) => {\\n      if (!needle) return true;\\n      const haystack = normaliseSearch([\\n        item.product_code,\\n        item.product_name,\\n        item.display_name,\\n        item.visual_class,\\n        item.family_name,\\n      ].filter(Boolean).join(\\\" \\\"));\\n      return haystack.includes(needle);\\n    })\\n    .slice(0, 12);\\n\\n  elements.productSuggestions.replaceChildren();\\n  matches.forEach((product) => {\\n    const button = document.createElement(\\\"button\\\");\\n    button.type = \\\"button\\\";\\n    button.className = \\\"product-suggestion\\\";\\n    const main = document.createElement(\\\"strong\\\");\\n    main.textContent = product.display_name || product.product_name || product.product_code;\\n    const meta = document.createElement(\\\"span\\\");\\n    meta.textContent = [product.product_code, product.family_name].filter(Boolean).join(\\\" · \\\");\\n    button.append(main, meta);\\n    button.addEventListener(\\\"click\\\", () => selectConfirmedProduct(product.product_code));\\n    elements.productSuggestions.appendChild(button);\\n  });\\n  elements.productSuggestions.classList.toggle(\\\"hidden\\\", matches.length === 0);\\n}\\n\\nfunction openProductOverride({ clear = false } = {}) {\\n  elements.productOverride.classList.remove(\\\"hidden\\\");\\n  if (clear) {\\n    state.selectedProductCode = \\\"\\\";\\n    elements.productSearchInput.value = \\\"\\\";\\n    elements.selectedProductSummary.textContent = \\\"Nhập tên hoặc mã của một sản phẩm đã train.\\\";\\n    elements.selectedProductSummary.classList.remove(\\\"selected\\\");\\n  }\\n  renderProductSuggestions(elements.productSearchInput.value);\\n  window.setTimeout(() => elements.productSearchInput.focus(), 0);\\n  updateConfirmEnabled();\\n}\\n\\nasync function optimiseImageFile(file) {\\n  if (!file || file.size < optimiseMinBytes || typeof createImageBitmap !== \\\"function\\\") {\\n    return file;\\n  }\\n  try {\\n    const bitmap = await createImageBitmap(file);\\n    const longest = Math.max(bitmap.width, bitmap.height);\\n    const scale = Math.min(1, uploadMaxLongSide / Math.max(1, longest));\\n    const width = Math.max(1, Math.round(bitmap.width * scale));\\n    const height = Math.max(1, Math.round(bitmap.height * scale));\\n    const canvas = typeof OffscreenCanvas === \\\"function\\\"\\n      ? new OffscreenCanvas(width, height)\\n      : document.createElement(\\\"canvas\\\");\\n    canvas.width = width;\\n    canvas.height = height;\\n    const context = canvas.getContext(\\\"2d\\\", { alpha: false });\\n    context.fillStyle = \\\"#ffffff\\\";\\n    context.fillRect(0, 0, width, height);\\n    context.drawImage(bitmap, 0, 0, width, height);\\n    bitmap.close();\\n    const blob = typeof canvas.convertToBlob === \\\"function\\\"\\n      ? await canvas.convertToBlob({ type: \\\"image/jpeg\\\", quality: uploadJpegQuality })\\n      : await new Promise((resolve) => canvas.toBlob(resolve, \\\"image/jpeg\\\", uploadJpegQuality));\\n    // Release the large pixel buffer promptly before starting the next image.\\n    canvas.width = 1;\\n    canvas.height = 1;\\n    if (!blob || blob.size >= file.size * 0.95) return file;\\n    const stem = String(file.name || \\\"image\\\").replace(/\\\\.[^.]+$/, \\\"\\\") || \\\"image\\\";\\n    return new File([blob], `${stem}.jpg`, { type: \\\"image/jpeg\\\", lastModified: file.lastModified });\\n  } catch (_) {\\n    return file;\\n  }\\n}\\n\\nasync function optimiseFilesForUpload(files) {\\n  let nextIndex = 0;\\n  let completed = 0;\\n  const output = new Array(files.length);\\n  const originalBytes = files.reduce((sum, file) => sum + file.size, 0);\\n  const workerCount = Math.min(imageOptimiseConcurrency, files.length);\\n\\n  elements.uploadProgress.querySelector(\\\".progress-copy span\\\").textContent =\\n    `Đang chuẩn bị tối ưu ${files.length} ảnh…`;\\n  elements.progressValue.textContent = \\\"3%\\\";\\n  elements.progressBar.style.width = \\\"3%\\\";\\n\\n  async function worker() {\\n    while (nextIndex < files.length) {\\n      const index = nextIndex++;\\n      output[index] = await optimiseImageFile(files[index]);\\n      completed += 1;\\n      elements.uploadProgress.querySelector(\\\".progress-copy span\\\").textContent =\\n        `Đang tối ưu ảnh ${completed}/${files.length}…`;\\n      const progress = Math.round(3 + (completed / files.length) * 7);\\n      elements.progressValue.textContent = `${progress}%`;\\n      elements.progressBar.style.width = `${progress}%`;\\n    }\\n  }\\n  await Promise.all(Array.from({ length: workerCount }, () => worker()));\\n  const optimisedBytes = output.reduce((sum, file) => sum + file.size, 0);\\n  const savedPercent = originalBytes > 0\\n    ? Math.max(0, Math.round((1 - optimisedBytes / originalBytes) * 100))\\n    : 0;\\n  elements.uploadProgress.querySelector(\\\".progress-copy span\\\").textContent =\\n    `Đã tối ưu ${files.length} ảnh: ${formatBytes(originalBytes)} → ${formatBytes(optimisedBytes)}${savedPercent ? ` (giảm ${savedPercent}%)` : \\\"\\\"}.`;\\n  return output;\\n}\\n\\nfunction showMessage(element, text, kind = \\\"\\\") {\\n  element.textContent = text;\\n  element.className = `message${kind ? ` message-${kind}` : \\\"\\\"}`;\\n}\\n\\nfunction hideMessage(element) {\\n  element.classList.add(\\\"hidden\\\");\\n}\\n\\nfunction apiError(payload, fallback) {\\n  if (payload && typeof payload.detail === \\\"string\\\") return payload.detail;\\n  if (payload && typeof payload.error === \\\"string\\\") return payload.error;\\n  return fallback;\\n}\\n\\nfunction lockRemoteSession(message = \\\"\\\", forgetCredentials = true) {\\n  if (!remoteWebhookMode) return;\\n  state.apiAuthorization = \\\"\\\";\\n  state.health = null;\\n  if (forgetCredentials) {\\n    safeStorage.removeItem(remoteAuthStorageKey);\\n    safeStorage.removeItem(remoteUsernameStorageKey);\\n  }\\n  document.documentElement.classList.remove(\\\"authenticated\\\");\\n  if (message) showMessage(elements.remoteLoginError, message, \\\"error\\\");\\n  else hideMessage(elements.remoteLoginError);\\n  window.setTimeout(() => elements.remoteUsername.focus(), 0);\\n}\\n\\nfunction rememberRemoteSession(username, authorization) {\\n  safeStorage.setItem(remoteAuthStorageKey, authorization);\\n  safeStorage.setItem(remoteUsernameStorageKey, username);\\n}\\n\\nfunction restoreRemoteSession() {\\n  const authorization = String(\\n    safeStorage.getItem(remoteAuthStorageKey) || \\\"\\\",\\n  ).trim();\\n  const username = String(\\n    safeStorage.getItem(remoteUsernameStorageKey) || \\\"\\\",\\n  ).trim();\\n  if (!/^Basic\\\\s+[A-Za-z0-9+/]+={0,2}$/.test(authorization)) {\\n    safeStorage.removeItem(remoteAuthStorageKey);\\n    safeStorage.removeItem(remoteUsernameStorageKey);\\n    return false;\\n  }\\n  state.apiAuthorization = authorization;\\n  elements.remoteUsername.value = username;\\n  return true;\\n}\\n\\nfunction encodeBasicAuthorization(username, password) {\\n  const bytes = new TextEncoder().encode(`${username}:${password}`);\\n  let binary = \\\"\\\";\\n  bytes.forEach((byte) => { binary += String.fromCharCode(byte); });\\n  return `Basic ${window.btoa(binary)}`;\\n}\\n\\nfunction webhookUrl(path, query = {}) {\\n  const url = new URL(`${webhookBase}/${path}`);\\n  Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value));\\n  return url.toString();\\n}\\n\\nasync function checkHealth() {\\n  try {\\n    let data;\\n    if (remoteWebhookMode) {\\n      data = await requestJson(webhookUrl(\\\"bakery-health\\\"), { cache: \\\"no-store\\\" });\\n      state.uploadMode = \\\"orchestrated\\\";\\n    } else {\\n      try {\\n        data = await requestJson(`${orchestratorBase}/health`, { cache: \\\"no-store\\\" });\\n        state.uploadMode = \\\"orchestrated\\\";\\n      } catch (orchestratorError) {\\n        data = await requestJson(\\\"/api/v1/bakery/health\\\", { cache: \\\"no-store\\\" });\\n        if (!data.ready) throw orchestratorError;\\n        state.uploadMode = \\\"direct\\\";\\n      }\\n    }\\n    if (!data.ready || !data.r2_configured) {\\n      throw new Error(data.detail || data.error || \\\"Pipeline n8n/R2 chưa sẵn sàng\\\");\\n    }\\n    state.health = data;\\n    const manufacturingOption = elements.documentType.querySelector(\\n      'option[value=\\\"MANUFACTURING\\\"]',\\n    );\\n    if (manufacturingOption) {\\n      manufacturingOption.disabled = data.manufacturing_configured === false;\\n      if (manufacturingOption.disabled && elements.documentType.value === \\\"MANUFACTURING\\\") {\\n        elements.documentType.value = \\\"PURCHASE_RECEIPT\\\";\\n      }\\n    }\\n    elements.systemStatus.classList.add(\\\"ready\\\");\\n    elements.systemStatus.classList.remove(\\\"error\\\");\\n    elements.systemStatus.querySelector(\\\"span:last-child\\\").textContent = \\\"Hệ thống sẵn sàng\\\";\\n    byId(\\\"hero-status-label\\\").textContent = state.uploadMode === \\\"direct\\\"\\n      ? \\\"Sẵn sàng · chế độ trực tiếp\\\"\\n      : \\\"Sẵn sàng vận hành\\\";\\n    byId(\\\"hero-panel\\\").classList.remove(\\\"unavailable\\\");\\n    const extensions = (data.allowed_image_extensions || []).map((item) => item.replace(\\\".\\\", \\\"\\\").toUpperCase()).join(\\\", \\\");\\n    byId(\\\"upload-limits\\\").textContent = `${extensions} · tối đa ${data.max_images_per_job} ảnh · ${data.max_image_size_mb} MB/ảnh · ${data.max_job_upload_size_mb} MB/lần`;\\n    validateSelection();\\n    renderSelection();\\n    return true;\\n  } catch (error) {\\n    elements.systemStatus.classList.add(\\\"error\\\");\\n    elements.systemStatus.querySelector(\\\"span:last-child\\\").textContent = \\\"Hệ thống chưa sẵn sàng\\\";\\n    byId(\\\"hero-status-label\\\").textContent = \\\"Cần kiểm tra hệ thống\\\";\\n    byId(\\\"hero-panel\\\").classList.add(\\\"unavailable\\\");\\n    showMessage(elements.uploadError, `Không thể bắt đầu: ${error.message}`, \\\"error\\\");\\n    if (remoteWebhookMode) showMessage(elements.remoteLoginError, error.message, \\\"error\\\");\\n    return false;\\n  }\\n}\\n\\nfunction selectFiles(fileList) {\\n  const incoming = Array.from(fileList).filter((file) => imageContentType(file));\\n  state.files = incoming;\\n  state.selectionError = incoming.length\\n    ? \\\"\\\"\\n    : \\\"Không tìm thấy ảnh JPG, PNG, WEBP hoặc BMP hợp lệ.\\\";\\n\\n  validateSelection();\\n  renderSelection();\\n}\\n\\nfunction validateSelection() {\\n  const maxImages = state.health?.max_images_per_job ?? defaultMaxImagesPerJob;\\n  const maxImageSizeMb = state.health?.max_image_size_mb ?? defaultMaxImageSizeMb;\\n  const maxJobUploadSizeMb = state.health?.max_job_upload_size_mb ?? defaultMaxJobUploadSizeMb;\\n  const maxBytes = maxImageSizeMb * 1024 * 1024;\\n  const maxTotalBytes = maxJobUploadSizeMb * 1024 * 1024;\\n  const totalBytes = state.files.reduce((sum, file) => sum + file.size, 0);\\n  const inputError = state.selectionError;\\n  state.selectionError = inputError;\\n  if (state.files.length > maxImages) {\\n    state.selectionError = `Mỗi job nhận tối đa ${maxImages} ảnh của cùng một SKU.`;\\n  } else if (state.files.some((file) => file.size > maxBytes)) {\\n    state.selectionError = `Có ảnh vượt quá giới hạn ${maxImageSizeMb} MB.`;\\n  } else if (totalBytes > maxTotalBytes) {\\n    // The browser compresses/resizes before presign, so validate the actual\\n    // optimized bytes later instead of rejecting high-resolution originals.\\n    state.selectionError = \\\"\\\";\\n  }\\n  if (state.selectionError) {\\n    showMessage(elements.uploadError, state.selectionError, \\\"error\\\");\\n  } else {\\n    hideMessage(elements.uploadError);\\n  }\\n}\\n\\nfunction renderSelection() {\\n  const count = state.files.length;\\n  elements.fileCounter.textContent = `${count} ảnh`;\\n  elements.selection.classList.toggle(\\\"hidden\\\", count === 0);\\n  elements.selectionSummary.textContent = count ? `${count} ảnh · ${formatBytes(state.files.reduce((sum, file) => sum + file.size, 0))} · sẽ tự resize/compress trước upload` : \\\"\\\";\\n  elements.fileList.replaceChildren();\\n  state.files.forEach((file) => {\\n    const item = document.createElement(\\\"li\\\");\\n    const name = document.createElement(\\\"span\\\");\\n    const size = document.createElement(\\\"span\\\");\\n    name.textContent = file.webkitRelativePath || file.name;\\n    size.textContent = formatBytes(file.size);\\n    item.append(name, size);\\n    elements.fileList.appendChild(item);\\n  });\\n  elements.startJob.disabled = count === 0 || !state.health?.ready || Boolean(state.selectionError);\\n}\\n\\nasync function requestJson(url, options = {}) {\\n  const headers = new Headers(options.headers || {});\\n  const response = await fetch(url, {\\n    ...options,\\n    headers,\\n    credentials: remoteWebhookMode ? \\\"omit\\\" : \\\"same-origin\\\",\\n  });\\n  let payload = {};\\n  try { payload = await response.json(); } catch (_) { /* ignore malformed response */ }\\n  if (!response.ok) throw new Error(apiError(payload, `Yêu cầu thất bại (HTTP ${response.status}).`));\\n  return payload;\\n}\\n\\nasync function runRemoteDeveloperRequest(action, payload = {}) {\\n  const queued = await requestJson(webhookUrl(\\\"bakery-developer-settings\\\"), {\\n    method: \\\"POST\\\",\\n    headers: { \\\"Content-Type\\\": \\\"application/json\\\" },\\n    body: JSON.stringify({\\n      action,\\n      developer_key: state.developerKey,\\n      ...payload,\\n    }),\\n  });\\n  throwWorkflowError(queued, \\\"Không thể gửi yêu cầu cấu hình developer.\\\");\\n  const requestId = queued.request_id;\\n  if (!requestId) throw new Error(\\\"n8n không trả về mã yêu cầu developer.\\\");\\n\\n  for (let attempt = 0; attempt < 180; attempt += 1) {\\n    await new Promise((resolve) => window.setTimeout(resolve, 500));\\n    const result = await requestJson(\\n      webhookUrl(\\\"bakery-developer-settings-status\\\", { request_id: requestId }),\\n      { cache: \\\"no-store\\\" },\\n    );\\n    const status = String(result.status || \\\"\\\").toUpperCase();\\n    if (status === \\\"COMPLETED\\\") return result;\\n    if (status === \\\"ERROR\\\") throw new Error(apiError(result, \\\"Cấu hình developer thất bại.\\\"));\\n  }\\n  throw new Error(\\\"Worker không phản hồi cấu hình developer trong thời gian cho phép.\\\");\\n}\\n\\nasync function developerRequest(action, payload = {}) {\\n  if (remoteWebhookMode) return runRemoteDeveloperRequest(action, payload);\\n  const isUpdate = action === \\\"UPDATE\\\";\\n  return requestJson(\\n    isUpdate\\n      ? \\\"/api/v1/bakery/developer/settings\\\"\\n      : \\\"/api/v1/bakery/developer/settings/query\\\",\\n    {\\n      method: isUpdate ? \\\"PUT\\\" : \\\"POST\\\",\\n      headers: { \\\"Content-Type\\\": \\\"application/json\\\" },\\n      body: JSON.stringify({ developer_key: state.developerKey, ...payload }),\\n    },\\n  );\\n}\\n\\nfunction renderDeveloperSettings(settings) {\\n  state.developerSettings = settings;\\n  elements.developerModel.replaceChildren();\\n  (settings.available_models || []).forEach((modelName) => {\\n    const option = document.createElement(\\\"option\\\");\\n    option.value = modelName;\\n    option.textContent = modelName;\\n    option.selected = modelName === settings.active_model;\\n    elements.developerModel.appendChild(option);\\n  });\\n\\n  elements.developerThresholdRows.replaceChildren();\\n  (settings.classes || []).forEach((item) => {\\n    const row = document.createElement(\\\"tr\\\");\\n    const rawClass = document.createElement(\\\"td\\\");\\n    const displayName = document.createElement(\\\"td\\\");\\n    const thresholdCell = document.createElement(\\\"td\\\");\\n    const input = document.createElement(\\\"input\\\");\\n    rawClass.textContent = item.raw_class || \\\"\\\";\\n    displayName.textContent = item.display_name || \\\"\\\";\\n    input.className = \\\"developer-threshold-input\\\";\\n    input.type = \\\"number\\\";\\n    input.min = \\\"0.01\\\";\\n    input.max = \\\"1\\\";\\n    input.step = \\\"0.01\\\";\\n    input.value = Number(item.confidence_threshold || 0.25).toFixed(2);\\n    input.dataset.rawClass = item.raw_class || \\\"\\\";\\n    input.setAttribute(\\\"aria-label\\\", `Confidence ${item.raw_class || \\\"class\\\"}`);\\n    thresholdCell.appendChild(input);\\n    row.append(rawClass, displayName, thresholdCell);\\n    elements.developerThresholdRows.appendChild(row);\\n  });\\n  elements.developerUpdatedAt.textContent = settings.updated_at\\n    ? `Lưu gần nhất: ${new Date(settings.updated_at).toLocaleString(\\\"vi-VN\\\")}`\\n    : \\\"Đang dùng cấu hình mặc định.\\\";\\n  elements.developerUnlockForm.classList.add(\\\"hidden\\\");\\n  elements.developerConfigForm.classList.remove(\\\"hidden\\\");\\n}\\n\\nfunction setDeveloperBusy(busy, label = \\\"\\\") {\\n  state.developerBusy = busy;\\n  elements.developerLoad.disabled = busy;\\n  elements.developerSave.disabled = busy;\\n  if (label) showMessage(elements.developerMessage, label);\\n}\\n\\nfunction openDeveloperSettings() {\\n  if (\\n    remoteWebhookMode\\n    && !document.documentElement.classList.contains(\\\"authenticated\\\")\\n  ) return;\\n  elements.developerOverlay.classList.remove(\\\"hidden\\\");\\n  elements.developerKey.focus();\\n}\\n\\nfunction closeDeveloperSettings() {\\n  if (state.developerBusy) return;\\n  elements.developerOverlay.classList.add(\\\"hidden\\\");\\n  elements.developerConfigForm.classList.add(\\\"hidden\\\");\\n  elements.developerUnlockForm.classList.remove(\\\"hidden\\\");\\n  elements.developerKey.value = \\\"\\\";\\n  state.developerKey = \\\"\\\";\\n  state.developerSettings = null;\\n  hideMessage(elements.developerMessage);\\n}\\n\\nfunction throwWorkflowError(payload, fallback) {\\n  if (String(payload?.status || \\\"\\\").toUpperCase() === \\\"ERROR\\\") {\\n    throw new Error(apiError(payload, fallback));\\n  }\\n}\\n\\nfunction isJobNotFound(value) {\\n  const message = typeof value === \\\"string\\\"\\n    ? value\\n    : apiError(value, value?.message || \\\"\\\");\\n  return /job\\\\s+not\\\\s+found/i.test(String(message));\\n}\\n\\nfunction isTransientPollError(error) {\\n  const message = String(error?.message || error || \\\"\\\");\\n  return isJobNotFound(message)\\n    || /failed to fetch|networkerror|load failed|network request failed/i.test(message)\\n    || /HTTP 5\\\\d\\\\d/i.test(message);\\n}\\n\\nfunction scheduleJobPoll(delayMs = jobPollIntervalMs) {\\n  clearTimeout(state.pollTimer);\\n  state.pollTimer = window.setTimeout(pollJob, delayMs);\\n}\\n\\nasync function prepareOrchestratedUploads(files) {\\n  const payload = { files, inference_mode: state.inferenceMode };\\n  if (!remoteWebhookMode) {\\n    return requestJson(`${orchestratorBase}/uploads/presign`, {\\n      method: \\\"POST\\\",\\n      headers: { \\\"Content-Type\\\": \\\"application/json\\\" },\\n      body: JSON.stringify(payload),\\n    });\\n  }\\n\\n  const queued = await requestJson(webhookUrl(\\\"bakery-upload-init\\\"), {\\n    method: \\\"POST\\\",\\n    headers: { \\\"Content-Type\\\": \\\"application/json\\\" },\\n    body: JSON.stringify(payload),\\n  });\\n  throwWorkflowError(queued, \\\"Không thể tạo phiên upload.\\\");\\n  if (Array.isArray(queued.uploads)) return queued;\\n  const requestId = queued.request_id || queued.job_id;\\n  if (!requestId) throw new Error(\\\"n8n không trả về mã phiên upload.\\\");\\n\\n  for (let attempt = 0; attempt < 90; attempt += 1) {\\n    await new Promise((resolve) => window.setTimeout(resolve, 500));\\n    const prepared = await requestJson(\\n      webhookUrl(\\\"bakery-request-status\\\", { request_id: requestId }),\\n      { cache: \\\"no-store\\\" },\\n    );\\n    throwWorkflowError(prepared, \\\"Worker không thể chuẩn bị URL upload.\\\");\\n    if (prepared.status === \\\"READY\\\" && Array.isArray(prepared.uploads)) return prepared;\\n  }\\n  throw new Error(\\\"Worker không phản hồi yêu cầu upload trong thời gian cho phép.\\\");\\n}\\n\\nasync function submitOrchestratedJob(payload) {\\n  const accepted = await requestJson(\\n    remoteWebhookMode ? webhookUrl(\\\"bakery-submit\\\") : `${orchestratorBase}/jobs`,\\n    {\\n      method: \\\"POST\\\",\\n      headers: { \\\"Content-Type\\\": \\\"application/json\\\" },\\n      body: JSON.stringify(payload),\\n    },\\n  );\\n  throwWorkflowError(accepted, \\\"n8n không thể tiếp nhận job.\\\");\\n  return accepted;\\n}\\n\\nasync function readOrchestratedJob(jobId) {\\n  const job = await requestJson(\\n    remoteWebhookMode\\n      ? webhookUrl(\\\"bakery-job-status\\\", { job_id: jobId })\\n      : `${orchestratorBase}/jobs/${encodeURIComponent(jobId)}`,\\n    { cache: \\\"no-store\\\" },\\n  );\\n  return job;\\n}\\n\\n\\nasync function confirmOrchestratedJob(jobId, payload) {\\n  const confirmed = await requestJson(\\n    remoteWebhookMode\\n      ? webhookUrl(\\\"bakery-confirm\\\")\\n      : `${orchestratorBase}/jobs/${encodeURIComponent(jobId)}/confirm`,\\n    {\\n      method: \\\"POST\\\",\\n      headers: { \\\"Content-Type\\\": \\\"application/json\\\" },\\n      body: JSON.stringify({ job_id: jobId, ...payload }),\\n    },\\n  );\\n  throwWorkflowError(confirmed, \\\"Không thể gửi xác nhận.\\\");\\n  return confirmed;\\n}\\n\\nasync function confirmDirectJob(jobId, payload) {\\n  return requestJson(\\n    `/api/v1/bakery/jobs/${encodeURIComponent(jobId)}/confirm`,\\n    {\\n      method: \\\"POST\\\",\\n      headers: { \\\"Content-Type\\\": \\\"application/json\\\" },\\n      body: JSON.stringify(payload),\\n    },\\n  );\\n}\\n\\nfunction updateUploadProgress(completed, total) {\\n  const percent = Math.round(10 + (completed / total) * 80);\\n  elements.progressValue.textContent = `${percent}%`;\\n  elements.progressBar.style.width = `${percent}%`;\\n  elements.uploadProgress.querySelector(\\\".progress-copy span\\\").textContent =\\n    `Đang tải ảnh lên R2 (${completed}/${total})…`;\\n}\\n\\nasync function uploadFilesToR2(files, uploads) {\\n  let nextIndex = 0;\\n  let completed = 0;\\n  const workerCount = Math.min(r2UploadConcurrency, files.length);\\n\\n  async function worker() {\\n    while (nextIndex < files.length) {\\n      const index = nextIndex;\\n      nextIndex += 1;\\n      const target = uploads[index];\\n      const response = await fetch(target.upload_url, {\\n        method: target.method || \\\"PUT\\\",\\n        headers: target.headers || { \\\"Content-Type\\\": files[index].type },\\n        body: files[index],\\n      });\\n      if (!response.ok) {\\n        throw new Error(`Không thể tải ${files[index].name} lên R2.`);\\n      }\\n      completed += 1;\\n      updateUploadProgress(completed, files.length);\\n    }\\n  }\\n\\n  await Promise.all(Array.from({ length: workerCount }, () => worker()));\\n}\\n\\nfunction rememberActiveJob(jobId) {\\n  safeStorage.setItem(\\n    activeJobStorageKey,\\n    JSON.stringify({\\n      job_id: jobId,\\n      upload_mode: state.uploadMode,\\n      submit_payload: state.lastSubmitPayload,\\n      inference_mode: state.inferenceMode,\\n      saved_at: Date.now(),\\n    }),\\n  );\\n}\\n\\nfunction forgetActiveJob() {\\n  safeStorage.removeItem(\\n    activeJobStorageKey,\\n  );\\n\\n  state.lastSubmitPayload = null;\\n  state.pollRetryCount = 0;\\n  state.terminalSyncRetryCount = 0;\\n}\\n\\nasync function uploadJobOrchestrated() {\\n  if (state.uploadInProgress) return;\\n  state.uploadInProgress = true;\\n  elements.startJob.disabled = true;\\n  elements.uploadProgress.classList.remove(\\\"hidden\\\");\\n  elements.progressValue.textContent = \\\"5%\\\";\\n  elements.progressBar.style.width = \\\"5%\\\";\\n  elements.uploadProgress.querySelector(\\\".progress-copy span\\\").textContent =\\n    \\\"Đang chuẩn bị phiên tải ảnh…\\\";\\n  hideMessage(elements.uploadError);\\n  try {\\n    state.inferenceMode = elements.inferenceMode.value;\\n    const uploadFiles = await optimiseFilesForUpload(state.files);\\n    const prepared = await prepareOrchestratedUploads(\\n      uploadFiles.map((file) => ({\\n        filename: file.name,\\n        content_type: imageContentType(file),\\n        size_bytes: file.size,\\n      })),\\n    );\\n    if (!Array.isArray(prepared.uploads) || prepared.uploads.length !== uploadFiles.length) {\\n      throw new Error(\\\"n8n không trả về đủ URL upload R2.\\\");\\n    }\\n\\n    await uploadFilesToR2(uploadFiles, prepared.uploads);\\n\\n    elements.uploadProgress.querySelector(\\\".progress-copy span\\\").textContent =\\n      \\\"Đang giao job cho AI…\\\";\\n    const submitPayload = {\\n      job_id: prepared.job_id,\\n      inference_mode: state.inferenceMode,\\n      files: prepared.uploads.map((item) => ({ object_key: item.object_key })),\\n    };\\n    let accepted;\\n    try {\\n      accepted = await submitOrchestratedJob(submitPayload);\\n    } catch (submitError) {\\n      // A lost response after a successful submit is safe: the backend returns\\n      // the existing job on retry and never schedules a second receipt.\\n      try {\\n        accepted = await readOrchestratedJob(prepared.job_id);\\n        if (!accepted?.job_id) throw submitError;\\n      } catch (_) {\\n        throw submitError;\\n      }\\n    }\\n    state.jobId = accepted.job_id;\\n    state.lastSubmitPayload = submitPayload;\\n    state.pollRetryCount = 0;\\n    state.terminalSyncRetryCount = 0;\\n    rememberActiveJob(state.jobId);\\n    elements.progressValue.textContent = \\\"100%\\\";\\n    elements.progressBar.style.width = \\\"100%\\\";\\n    elements.processingSection.classList.remove(\\\"hidden\\\");\\n    elements.processingSection.querySelector(\\\".spinner\\\").classList.remove(\\\"hidden\\\");\\n    elements.decisionSection.classList.add(\\\"hidden\\\");\\n    elements.resultsSection.classList.add(\\\"hidden\\\");\\n    elements.processingTitle.textContent = \\\"AI đang kiểm đếm…\\\";\\n    elements.processingCopy.textContent = `Đã tiếp nhận ${accepted.total_images} ảnh qua n8n/R2.`;\\n    elements.processingSection.scrollIntoView({ behavior: \\\"smooth\\\", block: \\\"center\\\" });\\n    scheduleJobPoll(initialJobPollDelayMs);\\n  } catch (error) {\\n    finishUploadError(error.message);\\n  } finally {\\n    state.uploadInProgress = false;\\n  }\\n}\\n\\nfunction uploadJob() {\\n  if (!state.files.length) return;\\n  if (state.uploadMode === \\\"direct\\\") {\\n    uploadJobDirect();\\n  } else {\\n    uploadJobOrchestrated();\\n  }\\n}\\n\\nasync function uploadJobDirect() {\\n  if (state.uploadInProgress) return;\\n  state.uploadInProgress = true;\\n  elements.startJob.disabled = true;\\n  elements.uploadProgress.classList.remove(\\\"hidden\\\");\\n  elements.progressValue.textContent = \\\"10%\\\";\\n  elements.progressBar.style.width = \\\"10%\\\";\\n  elements.uploadProgress.querySelector(\\\".progress-copy span\\\").textContent =\\n    \\\"Đang tải ảnh trực tiếp vào hệ thống…\\\";\\n  hideMessage(elements.uploadError);\\n\\n  try {\\n    state.inferenceMode = elements.inferenceMode.value;\\n    const uploadFiles = await optimiseFilesForUpload(state.files);\\n    const formData = new FormData();\\n    uploadFiles.forEach((file) => formData.append(\\\"files\\\", file, file.name));\\n    formData.append(\\\"inference_mode\\\", state.inferenceMode);\\n    const accepted = await requestJson(\\\"/api/v1/bakery/jobs\\\", {\\n      method: \\\"POST\\\",\\n      body: formData,\\n    });\\n    state.jobId = accepted.job_id;\\n    state.lastSubmitPayload = null;\\n    state.pollRetryCount = 0;\\n    state.terminalSyncRetryCount = 0;\\n    rememberActiveJob(state.jobId);\\n    elements.progressValue.textContent = \\\"100%\\\";\\n    elements.progressBar.style.width = \\\"100%\\\";\\n    elements.processingSection.classList.remove(\\\"hidden\\\");\\n    elements.processingSection.querySelector(\\\".spinner\\\").classList.remove(\\\"hidden\\\");\\n    elements.decisionSection.classList.add(\\\"hidden\\\");\\n    elements.resultsSection.classList.add(\\\"hidden\\\");\\n    elements.processingTitle.textContent = \\\"AI đang kiểm đếm…\\\";\\n    elements.processingCopy.textContent = `Đã tiếp nhận ${accepted.total_images} ảnh trực tiếp.`;\\n    elements.processingSection.scrollIntoView({ behavior: \\\"smooth\\\", block: \\\"center\\\" });\\n    scheduleJobPoll(initialJobPollDelayMs);\\n  } catch (error) {\\n    finishUploadError(error.message);\\n  } finally {\\n    state.uploadInProgress = false;\\n  }\\n}\\n\\nfunction finishUploadError(message) {\\n  elements.startJob.disabled = false;\\n  elements.uploadProgress.classList.add(\\\"hidden\\\");\\n  showMessage(elements.uploadError, message, \\\"error\\\");\\n}\\n\\nasync function pollJob() {\\n  clearTimeout(state.pollTimer);\\n\\n  try {\\n    const job = state.uploadMode === \\\"direct\\\"\\n      ? await requestJson(\\n          `/api/v1/bakery/jobs/${encodeURIComponent(state.jobId)}`,\\n          { cache: \\\"no-store\\\" },\\n        )\\n      : await readOrchestratedJob(state.jobId);\\n\\n    const status = String(job.status || \\\"\\\").toUpperCase();\\n\\n    if (\\n      remoteWebhookMode\\n      && status === \\\"ERROR\\\"\\n      && isJobNotFound(job)\\n      && state.pollRetryCount < maxTransientPollRetries\\n    ) {\\n      state.pollRetryCount += 1;\\n      elements.processingTitle.textContent = \\\"Đang đồng bộ job với AI…\\\";\\n      elements.processingCopy.textContent =\\n        `Đang xác nhận job (${state.pollRetryCount}/${maxTransientPollRetries})…`;\\n\\n      if (\\n        state.lastSubmitPayload\\n        && (state.pollRetryCount === 3 || state.pollRetryCount === 10)\\n      ) {\\n        await submitOrchestratedJob(state.lastSubmitPayload);\\n      }\\n\\n      scheduleJobPoll();\\n      return;\\n    }\\n\\n    state.currentJob = job;\\n    const progressText = `Đã xử lý ${job.processed_images || 0}/${job.total_images || 0} ảnh.`;\\n    elements.processingCopy.textContent = job.message\\n      ? `${job.message} ${progressText}`\\n      : progressText;\\n\\n    if ([\\\"AWAITING_CONFIRMATION\\\", \\\"NEEDS_RETAKE\\\"].includes(status)) {\\n      // PROCESS progress and PROCESS final are separate callbacks. The n8n\\n      // workflow now stores a durable worker-final snapshot and job-status\\n      // prefers that snapshot over a stale lightweight progress object.\\n      const hasDecisionPayload = Boolean(\\n        job.decision\\n        && typeof job.decision === \\\"object\\\"\\n        && String(job.decision.decision || \\\"\\\").trim(),\\n      );\\n      if (!hasDecisionPayload) {\\n        state.pollRetryCount = 0;\\n        state.terminalSyncRetryCount += 1;\\n        elements.processingSection.classList.remove(\\\"hidden\\\");\\n        const spinner = elements.processingSection.querySelector(\\\".spinner\\\");\\n        elements.processingTitle.textContent = \\\"Đang đồng bộ kết quả AI…\\\";\\n        if (state.terminalSyncRetryCount <= maxTerminalSyncRetries) {\\n          spinner.classList.remove(\\\"hidden\\\");\\n          elements.processingCopy.textContent =\\n            `AI đã xử lý xong ${job.processed_images || 0}/${job.total_images || 0} ảnh. `\\n            + `Đang nhận payload xác nhận đầy đủ (${state.terminalSyncRetryCount}/${maxTerminalSyncRetries})…`;\\n          scheduleJobPoll(400);\\n        } else {\\n          // Never show an endless spinner. Keep retrying slowly so a recovered\\n          // final snapshot still appears without forcing the operator to reload.\\n          spinner.classList.add(\\\"hidden\\\");\\n          elements.processingTitle.textContent = \\\"Kết quả AI đang chờ đồng bộ\\\";\\n          elements.processingCopy.textContent =\\n            \\\"AI đã xử lý xong nhưng n8n chưa trả decision đầy đủ. Trang sẽ tiếp tục tự kiểm tra; không cần chạy lại job.\\\";\\n          scheduleJobPoll(2000);\\n        }\\n        return;\\n      }\\n\\n      state.pollRetryCount = 0;\\n      state.terminalSyncRetryCount = 0;\\n      elements.processingSection.classList.add(\\\"hidden\\\");\\n      elements.uploadProgress.classList.add(\\\"hidden\\\");\\n      if (status === \\\"NEEDS_RETAKE\\\") forgetActiveJob();\\n      renderDecision(job);\\n      return;\\n    }\\n\\n    if (status === \\\"CONFIRMING\\\") {\\n      state.pollRetryCount = 0;\\n      if (job.confirmation_error) {\\n        elements.processingSection.classList.add(\\\"hidden\\\");\\n        renderDecision(job);\\n        return;\\n      }\\n      elements.processingSection.classList.remove(\\\"hidden\\\");\\n      elements.processingSection.querySelector(\\\".spinner\\\").classList.remove(\\\"hidden\\\");\\n      const manufacturing = String(job.document_type || \\\"\\\").toUpperCase() === \\\"MANUFACTURING\\\";\\n      elements.processingTitle.textContent = manufacturing\\n        ? \\\"Đang tạo phiếu sản xuất…\\\"\\n        : \\\"Đang tạo phiếu nhập hàng…\\\";\\n      elements.processingCopy.textContent = manufacturing\\n        ? \\\"Đã xác nhận kết quả AI. Worker đang điều khiển KiotViet để tạo phiếu sản xuất.\\\"\\n        : \\\"Đã xác nhận kết quả AI. Worker đang đối chiếu productCode và tạo phiếu nhập hàng.\\\";\\n      scheduleJobPoll();\\n      return;\\n    }\\n\\n    if (status === \\\"COMPLETED\\\") {\\n      state.pollRetryCount = 0;\\n      forgetActiveJob();\\n      elements.processingSection.classList.add(\\\"hidden\\\");\\n      elements.uploadProgress.classList.add(\\\"hidden\\\");\\n      elements.decisionSection.classList.add(\\\"hidden\\\");\\n      renderResults(job);\\n      return;\\n    }\\n\\n    if (status === \\\"ERROR\\\") {\\n      if (remoteWebhookMode && isJobNotFound(job)) {\\n        forgetActiveJob();\\n        throw new Error(\\n          \\\"n8n chưa đồng bộ được job sau nhiều lần thử. Vui lòng kiểm tra worker rồi thực hiện lại.\\\",\\n        );\\n      }\\n      forgetActiveJob();\\n      throw new Error(job.error || \\\"AI không thể xử lý bộ ảnh này.\\\");\\n    }\\n\\n    state.pollRetryCount = 0;\\n    state.terminalSyncRetryCount = 0;\\n    scheduleJobPoll();\\n  } catch (error) {\\n    if (\\n      remoteWebhookMode\\n      && isTransientPollError(error)\\n      && state.pollRetryCount < maxTransientPollRetries\\n    ) {\\n      state.pollRetryCount += 1;\\n      elements.processingTitle.textContent = \\\"Đang nối lại với hệ thống…\\\";\\n      elements.processingCopy.textContent =\\n        `Kết nối tạm thời gián đoạn, đang thử lại (${state.pollRetryCount}/${maxTransientPollRetries})…`;\\n      scheduleJobPoll();\\n      return;\\n    }\\n\\n    elements.processingTitle.textContent = \\\"Xử lý không thành công\\\";\\n    elements.processingCopy.textContent = error.message;\\n    elements.processingSection.querySelector(\\\".spinner\\\").classList.add(\\\"hidden\\\");\\n    elements.startJob.disabled = false;\\n  }\\n}\\n\\nfunction percent(value) {\\n  const number = Number(value);\\n  if (!Number.isFinite(number)) return \\\"—\\\";\\n  return `${(number * 100).toFixed(1)}%`;\\n}\\n\\nfunction renderAnnotatedGrid(container, images = []) {\\n  container.replaceChildren();\\n\\n  images.forEach((image) => {\\n    const wrapper = image.annotated_url\\n      ? document.createElement(\\\"a\\\")\\n      : document.createElement(\\\"div\\\");\\n\\n    wrapper.className = \\\"annotated-item\\\";\\n\\n    if (image.annotated_url) {\\n      wrapper.href = image.annotated_url;\\n      wrapper.target = \\\"_blank\\\";\\n      wrapper.rel = \\\"noopener\\\";\\n    }\\n\\n    if (image.annotated_url) {\\n      const picture = document.createElement(\\\"img\\\");\\n      picture.src = image.annotated_url;\\n      picture.alt = `Ảnh nhận diện ${image.image_name || \\\"\\\"}`;\\n      picture.loading = \\\"lazy\\\";\\n      wrapper.appendChild(picture);\\n    } else {\\n      const placeholder = document.createElement(\\\"div\\\");\\n      placeholder.className = \\\"annotated-placeholder\\\";\\n      placeholder.textContent = \\\"Ảnh annotated chưa có link tải\\\";\\n      wrapper.appendChild(placeholder);\\n    }\\n\\n    const info = document.createElement(\\\"div\\\");\\n    const name = document.createElement(\\\"span\\\");\\n    const count = document.createElement(\\\"span\\\");\\n    name.textContent = image.image_name || \\\"Ảnh\\\";\\n    count.textContent = `${Number(image.total_detections || 0)} box`;\\n    info.append(name, count);\\n    wrapper.appendChild(info);\\n    container.appendChild(wrapper);\\n  });\\n}\\n\\nfunction renderDecision(job) {\\n  state.currentJob = job;\\n  state.productCatalog = Array.isArray(job.product_catalog) ? job.product_catalog : [];\\n  state.selectedProductCode = \\\"\\\";\\n  elements.resultsSection.classList.add(\\\"hidden\\\");\\n  elements.decisionSection.classList.remove(\\\"hidden\\\");\\n  elements.documentType.value = String(job.document_type || \\\"\\\").toUpperCase() === \\\"MANUFACTURING\\\"\\n    ? \\\"MANUFACTURING\\\"\\n    : \\\"PURCHASE_RECEIPT\\\";\\n\\n  const decision = job.decision || {};\\n  const type = String(decision.decision || \\\"AMBIGUOUS\\\").toUpperCase();\\n  const isConfirmable = [\\\"DIRECT\\\", \\\"FAMILY\\\", \\\"REVIEW\\\"].includes(type);\\n\\n  // Old jobs may not contain product_catalog; keep their known candidates usable.\\n  if (!state.productCatalog.length) {\\n    const fallback = [];\\n    if (decision.product_code) fallback.push({\\n      product_code: decision.product_code,\\n      product_name: decision.product_name || decision.display_name || decision.product_code,\\n      display_name: decision.display_name || decision.product_name || decision.product_code,\\n    });\\n    [...(decision.members || []), ...(decision.candidates || [])].forEach((item) => {\\n      if (item?.product_code) fallback.push(item);\\n    });\\n    const seen = new Set();\\n    state.productCatalog = fallback.filter((item) => {\\n      const key = String(item.product_code || \\\"\\\").toLowerCase();\\n      if (!key || seen.has(key)) return false;\\n      seen.add(key);\\n      return true;\\n    });\\n  }\\n\\n  elements.decisionJobReference.textContent = `JOB ${job.job_id}`;\\n  elements.decisionClass.textContent = decision.display_name || decision.dominant_class || \\\"Cần review\\\";\\n  elements.decisionCount.textContent = Number(decision.count || 0);\\n  elements.decisionImages.textContent = `${Number(job.processed_images || 0)}/${Number(job.total_images || 0)}`;\\n  elements.decisionPurity.textContent = percent(decision.purity);\\n  elements.decisionConfidence.textContent = percent(decision.avg_confidence);\\n  elements.decisionBadge.textContent = type.replaceAll(\\\"_\\\", \\\" \\\");\\n  elements.decisionBadge.dataset.kind = type.toLowerCase();\\n\\n  if (type === \\\"DIRECT\\\") {\\n    elements.decisionTitle.textContent = `${decision.display_name || decision.product_name || \\\"SKU\\\"} · ${Number(decision.count || 0)} sản phẩm`;\\n  } else if (type === \\\"FAMILY\\\") {\\n    elements.decisionTitle.textContent = `${decision.display_name || \\\"Family\\\"} · ${Number(decision.count || 0)} sản phẩm`;\\n  } else if (type === \\\"REVIEW\\\") {\\n    elements.decisionTitle.textContent = \\\"AI chưa đồng thuận hoàn toàn — hãy chọn sản phẩm đúng\\\";\\n  } else if (type === \\\"NO_DETECTION\\\") {\\n    elements.decisionTitle.textContent = \\\"Không phát hiện sản phẩm\\\";\\n  } else {\\n    elements.decisionTitle.textContent = \\\"Cần chụp lại hoặc review\\\";\\n  }\\n  elements.decisionMessage.textContent = decision.message || job.message || (isConfirmable\\n    ? \\\"Kiểm tra class và count trước khi xác nhận.\\\"\\n    : \\\"Job chưa đủ điều kiện tạo phiếu.\\\");\\n\\n  elements.familySkuSelect.replaceChildren();\\n  const defaultOption = document.createElement(\\\"option\\\");\\n  defaultOption.value = \\\"\\\";\\n  defaultOption.textContent = \\\"— Chọn sản phẩm —\\\";\\n  elements.familySkuSelect.appendChild(defaultOption);\\n\\n  elements.productOverride.classList.add(\\\"hidden\\\");\\n  elements.productSuggestions.classList.add(\\\"hidden\\\");\\n  elements.productSearchInput.value = \\\"\\\";\\n  elements.selectedProductSummary.textContent = \\\"Chưa chọn sản phẩm xác nhận.\\\";\\n  elements.selectedProductSummary.classList.remove(\\\"selected\\\");\\n\\n  if (type === \\\"DIRECT\\\") {\\n    elements.familySelection.classList.add(\\\"hidden\\\");\\n    elements.productOverride.classList.remove(\\\"hidden\\\");\\n    const detected = catalogProduct(decision.product_code);\\n    if (detected) selectConfirmedProduct(detected.product_code);\\n    else openProductOverride({ clear: true });\\n  } else if ([\\\"FAMILY\\\", \\\"REVIEW\\\"].includes(type)) {\\n    const choices = type === \\\"FAMILY\\\" ? (decision.members || []) : (decision.candidates || []);\\n    choices.forEach((member) => {\\n      const option = document.createElement(\\\"option\\\");\\n      option.value = member.product_code || \\\"\\\";\\n      const source = member.source ? `${member.source} · ` : \\\"\\\";\\n      const candidateCount = Number(member.count || 0) > 0 ? ` · count ${Number(member.count)}` : \\\"\\\";\\n      option.textContent = `${source}${member.display_name || member.product_name || member.product_code} · ${member.product_code}${candidateCount}`;\\n      elements.familySkuSelect.appendChild(option);\\n    });\\n    const other = document.createElement(\\\"option\\\");\\n    other.value = \\\"__OTHER__\\\";\\n    other.textContent = \\\"Khác — tìm trong toàn bộ sản phẩm đã train\\\";\\n    elements.familySkuSelect.appendChild(other);\\n    elements.familySelectionLabel.textContent = type === \\\"REVIEW\\\"\\n      ? \\\"Chọn gợi ý đúng hoặc chọn Khác\\\"\\n      : \\\"Chọn SKU con trong family hoặc Khác\\\";\\n    if (elements.familySelectionHelp) {\\n      elements.familySelectionHelp.textContent = type === \\\"REVIEW\\\"\\n        ? \\\"AI chưa đồng thuận hoàn toàn về class/SKU. Hãy chọn sản phẩm đúng trước khi xác nhận KiotViet.\\\"\\n        : \\\"AI chỉ xác định được family hình ảnh; hãy chọn đúng SKU con để gửi productCode sang KiotViet.\\\";\\n    }\\n    elements.familySelection.classList.remove(\\\"hidden\\\");\\n    if (!choices.length) {\\n      elements.familySkuSelect.value = \\\"__OTHER__\\\";\\n      openProductOverride({ clear: true });\\n    }\\n  } else {\\n    elements.familySelection.classList.add(\\\"hidden\\\");\\n    elements.productOverride.classList.add(\\\"hidden\\\");\\n  }\\n\\n  elements.confirmedQuantity.value = Number(decision.count || 0) > 0 ? String(Number(decision.count)) : \\\"\\\";\\n\\n  const perImage = Array.isArray(decision.per_image)\\n    ? decision.per_image\\n    : (job.images || []).map((image) => ({\\n        image_name: image.image_name,\\n        count: image.decision?.count ?? image.total_detections ?? 0,\\n        purity: image.decision?.purity,\\n        avg_confidence: image.decision?.avg_confidence ?? image.avg_confidence,\\n      }));\\n  elements.decisionImageRows.replaceChildren();\\n  perImage.forEach((image) => {\\n    const row = document.createElement(\\\"tr\\\");\\n    const values = [image.image_name || \\\"Ảnh\\\", Number(image.count || 0), percent(image.purity), percent(image.avg_confidence)];\\n    values.forEach((value, index) => {\\n      const cell = document.createElement(\\\"td\\\");\\n      cell.textContent = value;\\n      if (index > 0) cell.className = \\\"number\\\";\\n      row.appendChild(cell);\\n    });\\n    elements.decisionImageRows.appendChild(row);\\n  });\\n  renderAnnotatedGrid(elements.decisionAnnotatedGrid, job.images || []);\\n\\n  elements.confirmJob.classList.toggle(\\\"hidden\\\", !isConfirmable);\\n  elements.confirmJob.textContent = elements.documentType.value === \\\"MANUFACTURING\\\"\\n    ? \\\"Xác nhận sản phẩm, count và tạo phiếu sản xuất\\\"\\n    : \\\"Xác nhận sản phẩm, count và tạo phiếu nhập hàng\\\";\\n  if (job.confirmation_error) showMessage(elements.confirmationError, job.confirmation_error, \\\"error\\\");\\n  else hideMessage(elements.confirmationError);\\n  updateConfirmEnabled();\\n\\n  elements.startJob.disabled = false;\\n  elements.decisionSection.scrollIntoView({ behavior: \\\"smooth\\\", block: \\\"start\\\" });\\n}\\n\\nfunction renderResults(job) {\\n  state.currentJob = job;\\n  elements.resultsSection.classList.remove(\\\"hidden\\\");\\n  byId(\\\"job-reference\\\").textContent = `JOB ${job.job_id}`;\\n  byId(\\\"metric-products\\\").textContent = Number(job.product_count || 0);\\n  byId(\\\"metric-quantity\\\").textContent = Number(job.total_quantity || 0);\\n  byId(\\\"metric-images\\\").textContent = Number(job.processed_images || 0);\\n  byId(\\\"metric-r2\\\").textContent = job.r2_objects?.length ? \\\"Đã lưu\\\" : \\\"Chưa lưu\\\";\\n\\n  const excel = byId(\\\"download-excel\\\");\\n  if (job.excel_url) {\\n    excel.href = job.excel_url;\\n    excel.classList.remove(\\\"hidden\\\");\\n  } else {\\n    excel.removeAttribute(\\\"href\\\");\\n    excel.classList.add(\\\"hidden\\\");\\n  }\\n\\n  const rows = byId(\\\"product-rows\\\");\\n  rows.replaceChildren();\\n  (job.products || []).forEach((product) => {\\n    const row = document.createElement(\\\"tr\\\");\\n    [\\n      product.product_code,\\n      product.product_name,\\n      product.quantity,\\n      `${Number(product.purchase_price || 0).toLocaleString(\\\"vi-VN\\\")} đ`,\\n    ].forEach((value, index) => {\\n      const cell = document.createElement(\\\"td\\\");\\n      cell.textContent = value ?? \\\"\\\";\\n      if (index >= 2) cell.className = \\\"number\\\";\\n      row.appendChild(cell);\\n    });\\n    rows.appendChild(row);\\n  });\\n\\n  renderAnnotatedGrid(byId(\\\"annotated-grid\\\"), job.images || []);\\n\\n  const existingReceipt = job.kiotviet?.created === true;\\n  if (existingReceipt) {\\n    const receipt = job.kiotviet.receipt || {};\\n    const manufacturing = String(\\n      job.document_type || job.kiotviet.document_type || \\\"\\\",\\n    ).toUpperCase() === \\\"MANUFACTURING\\\";\\n    const productId = job.kiotviet.resolved_product_id\\n      || job.confirmed_product?.product_id;\\n    showMessage(\\n      elements.kiotvietMessage,\\n      `Đã tạo ${manufacturing ? \\\"phiếu sản xuất\\\" : \\\"phiếu nhập hàng\\\"} ${receipt.code || \\\"KiotViet\\\"}`\\n      + `${productId ? ` · productId ${productId}` : \\\"\\\"}.`,\\n      \\\"success\\\",\\n    );\\n  } else {\\n    showMessage(\\n      elements.kiotvietMessage,\\n      \\\"Job đã hoàn tất nhưng chưa ghi nhận phiếu KiotViet. Vui lòng kiểm tra trạng thái backend.\\\",\\n      \\\"error\\\",\\n    );\\n  }\\n\\n  elements.startJob.disabled = false;\\n  elements.resultsSection.scrollIntoView({ behavior: \\\"smooth\\\", block: \\\"start\\\" });\\n}\\n\\nasync function submitConfirmation() {\\n  if (state.confirmationInProgress || !state.currentJob?.job_id) return;\\n  const decision = state.currentJob.decision || {};\\n  const type = String(decision.decision || \\\"\\\").toUpperCase();\\n  if (![\\\"DIRECT\\\", \\\"FAMILY\\\", \\\"REVIEW\\\"].includes(type)) return;\\n\\n  const confirmedQuantity = Number(elements.confirmedQuantity.value);\\n  if (!Number.isInteger(confirmedQuantity) || confirmedQuantity < 1 || confirmedQuantity > 5000) {\\n    showMessage(elements.confirmationError, \\\"Số lượng xác nhận phải là số nguyên từ 1 đến 5000.\\\", \\\"error\\\");\\n    return;\\n  }\\n  if (!state.selectedProductCode || !catalogProduct(state.selectedProductCode)) {\\n    showMessage(elements.confirmationError, \\\"Hãy chọn một sản phẩm trong danh sách đã train trước khi xác nhận.\\\", \\\"error\\\");\\n    return;\\n  }\\n\\n  const selected = catalogProduct(state.selectedProductCode);\\n  const documentType = elements.documentType.value === \\\"MANUFACTURING\\\"\\n    ? \\\"MANUFACTURING\\\"\\n    : \\\"PURCHASE_RECEIPT\\\";\\n  const documentLabel = documentType === \\\"MANUFACTURING\\\"\\n    ? \\\"phiếu sản xuất\\\"\\n    : \\\"phiếu nhập hàng\\\";\\n  const payload = {\\n    confirm: true,\\n    quantity: confirmedQuantity,\\n    product_code: selected.product_code,\\n    document_type: documentType,\\n  };\\n  const confirmed = window.confirm(\\n    `Xác nhận ${productLabel(selected)} · số lượng ${confirmedQuantity} và tạo ${documentLabel} thật trên KiotViet?`,\\n  );\\n  if (!confirmed) return;\\n\\n  state.confirmationInProgress = true;\\n  updateConfirmEnabled();\\n  hideMessage(elements.confirmationError);\\n  try {\\n    let result;\\n    if (state.uploadMode === \\\"direct\\\") result = await confirmDirectJob(state.currentJob.job_id, payload);\\n    else result = await confirmOrchestratedJob(state.currentJob.job_id, payload);\\n    state.currentJob = result;\\n    if (String(result.status || \\\"\\\").toUpperCase() === \\\"COMPLETED\\\") {\\n      forgetActiveJob();\\n      elements.decisionSection.classList.add(\\\"hidden\\\");\\n      renderResults(result);\\n      return;\\n    }\\n    rememberActiveJob(state.currentJob.job_id);\\n    elements.decisionSection.classList.add(\\\"hidden\\\");\\n    elements.processingSection.classList.remove(\\\"hidden\\\");\\n    elements.processingSection.querySelector(\\\".spinner\\\").classList.remove(\\\"hidden\\\");\\n    elements.processingTitle.textContent = `Đang tạo ${documentLabel}…`;\\n    elements.processingCopy.textContent = documentType === \\\"MANUFACTURING\\\"\\n      ? \\\"Worker đang điều khiển KiotViet để tạo phiếu sản xuất; vui lòng không tắt máy AI.\\\"\\n      : \\\"Đang xác thực SKU với KiotViet và chờ worker hoàn tất.\\\";\\n    scheduleJobPoll(400);\\n  } catch (error) {\\n    showMessage(elements.confirmationError, error.message, \\\"error\\\");\\n  } finally {\\n    state.confirmationInProgress = false;\\n    updateConfirmEnabled();\\n  }\\n}\\n\\nfunction resetForRetake() {\\n  clearTimeout(state.pollTimer);\\n  forgetActiveJob();\\n  state.jobId = null;\\n  state.currentJob = null;\\n  state.productCatalog = [];\\n  state.selectedProductCode = \\\"\\\";\\n  state.files = [];\\n  state.selectionError = \\\"\\\";\\n  // Every fresh counting session must start in AUTO.  A resumed active job\\n  // intentionally retains its recorded mode so its status stays truthful.\\n  state.inferenceMode = defaultInferenceMode;\\n  elements.inferenceMode.value = defaultInferenceMode;\\n  elements.documentType.value = \\\"PURCHASE_RECEIPT\\\";\\n  elements.fileInput.value = \\\"\\\";\\n  elements.folderInput.value = \\\"\\\";\\n  elements.decisionSection.classList.add(\\\"hidden\\\");\\n  elements.resultsSection.classList.add(\\\"hidden\\\");\\n  elements.processingSection.classList.add(\\\"hidden\\\");\\n  elements.uploadProgress.classList.add(\\\"hidden\\\");\\n  renderSelection();\\n  byId(\\\"upload-panel\\\").scrollIntoView({ behavior: \\\"smooth\\\", block: \\\"start\\\" });\\n}\\n\\nbyId(\\\"pick-files\\\").addEventListener(\\\"click\\\", (event) => { event.stopPropagation(); elements.fileInput.click(); });\\nbyId(\\\"pick-folder\\\").addEventListener(\\\"click\\\", (event) => { event.stopPropagation(); elements.folderInput.click(); });\\nelements.fileInput.addEventListener(\\\"change\\\", (event) => selectFiles(event.target.files));\\nelements.folderInput.addEventListener(\\\"change\\\", (event) => selectFiles(event.target.files));\\nelements.fileInput.addEventListener(\\\"click\\\", (event) => event.stopPropagation());\\nelements.folderInput.addEventListener(\\\"click\\\", (event) => event.stopPropagation());\\nelements.dropZone.addEventListener(\\\"click\\\", (event) => {\\n  if (event.target.closest(\\\"button, input\\\")) return;\\n  elements.fileInput.click();\\n});\\nelements.dropZone.addEventListener(\\\"keydown\\\", (event) => {\\n  if (event.key === \\\"Enter\\\" || event.key === \\\" \\\") { event.preventDefault(); elements.fileInput.click(); }\\n});\\n[\\\"dragenter\\\", \\\"dragover\\\"].forEach((name) => elements.dropZone.addEventListener(name, (event) => {\\n  event.preventDefault(); elements.dropZone.classList.add(\\\"dragging\\\");\\n}));\\n[\\\"dragleave\\\", \\\"drop\\\"].forEach((name) => elements.dropZone.addEventListener(name, (event) => {\\n  event.preventDefault(); elements.dropZone.classList.remove(\\\"dragging\\\");\\n}));\\nelements.dropZone.addEventListener(\\\"drop\\\", (event) => selectFiles(event.dataTransfer.files));\\nbyId(\\\"clear-files\\\").addEventListener(\\\"click\\\", () => {\\n  state.files = [];\\n  state.selectionError = \\\"\\\";\\n  elements.fileInput.value = \\\"\\\";\\n  elements.folderInput.value = \\\"\\\";\\n  renderSelection();\\n});\\nelements.startJob.addEventListener(\\\"click\\\", uploadJob);\\nelements.confirmJob.addEventListener(\\\"click\\\", submitConfirmation);\\nelements.retakeJob.addEventListener(\\\"click\\\", resetForRetake);\\nelements.familySkuSelect.addEventListener(\\\"change\\\", () => {\\n  const value = elements.familySkuSelect.value.trim();\\n  hideMessage(elements.confirmationError);\\n  if (value === \\\"__OTHER__\\\") {\\n    openProductOverride({ clear: true });\\n  } else if (value) {\\n    elements.productOverride.classList.add(\\\"hidden\\\");\\n    selectConfirmedProduct(value);\\n  } else {\\n    state.selectedProductCode = \\\"\\\";\\n    elements.productOverride.classList.add(\\\"hidden\\\");\\n    updateConfirmEnabled();\\n  }\\n});\\nelements.confirmedQuantity.addEventListener(\\\"input\\\", updateConfirmEnabled);\\nelements.documentType.addEventListener(\\\"change\\\", () => {\\n  elements.confirmJob.textContent = elements.documentType.value === \\\"MANUFACTURING\\\"\\n    ? \\\"Xác nhận và tạo phiếu sản xuất\\\"\\n    : \\\"Xác nhận và tạo phiếu nhập hàng\\\";\\n  updateConfirmEnabled();\\n});\\nelements.productSearchInput.addEventListener(\\\"input\\\", () => {\\n  state.selectedProductCode = \\\"\\\";\\n  elements.selectedProductSummary.textContent = \\\"Chọn một gợi ý bên dưới để xác nhận class.\\\";\\n  elements.selectedProductSummary.classList.remove(\\\"selected\\\");\\n  renderProductSuggestions(elements.productSearchInput.value);\\n  updateConfirmEnabled();\\n});\\nelements.productSearchInput.addEventListener(\\\"focus\\\", () => {\\n  renderProductSuggestions(elements.productSearchInput.value);\\n});\\ndocument.addEventListener(\\\"click\\\", (event) => {\\n  if (!event.target.closest(\\\"#product-override\\\")) {\\n    elements.productSuggestions.classList.add(\\\"hidden\\\");\\n  }\\n});\\n\\nelements.remoteLoginForm.addEventListener(\\\"submit\\\", async (event) => {\\n  event.preventDefault();\\n  if (!remoteWebhookMode) return;\\n  const username = elements.remoteUsername.value.trim();\\n  const password = elements.remotePassword.value;\\n  if (!username || !password) return;\\n  elements.remoteLoginSubmit.disabled = true;\\n  elements.remoteLoginSubmit.textContent = \\\"Đang kiểm tra…\\\";\\n  hideMessage(elements.remoteLoginError);\\n  state.apiAuthorization = encodeBasicAuthorization(username, password);\\n  const ready = await checkHealth();\\n  if (ready) {\\n    rememberRemoteSession(username, state.apiAuthorization);\\n    document.documentElement.classList.add(\\\"authenticated\\\");\\n    elements.remotePassword.value = \\\"\\\";\\n    hideMessage(elements.remoteLoginError);\\n    await resumeActiveJob();\\n  } else {\\n    state.apiAuthorization = \\\"\\\";\\n  }\\n  elements.remoteLoginSubmit.disabled = false;\\n  elements.remoteLoginSubmit.textContent = \\\"Đăng nhập\\\";\\n});\\n\\nelements.remoteLogout.addEventListener(\\\"click\\\", () => {\\n  clearTimeout(state.pollTimer);\\n  lockRemoteSession();\\n  elements.remotePassword.value = \\\"\\\";\\n});\\n\\nlet developerHoldTimer = null;\\nlet developerClickTimes = [];\\nelements.developerTrigger.addEventListener(\\\"pointerdown\\\", () => {\\n  window.clearTimeout(developerHoldTimer);\\n  developerHoldTimer = window.setTimeout(openDeveloperSettings, 1200);\\n});\\n[\\\"pointerup\\\", \\\"pointercancel\\\", \\\"pointerleave\\\"].forEach((eventName) => {\\n  elements.developerTrigger.addEventListener(eventName, () => {\\n    window.clearTimeout(developerHoldTimer);\\n  });\\n});\\nelements.developerTrigger.addEventListener(\\\"click\\\", (event) => {\\n  event.preventDefault();\\n  const now = Date.now();\\n  developerClickTimes = developerClickTimes.filter((value) => now - value < 4000);\\n  developerClickTimes.push(now);\\n  if (developerClickTimes.length >= 7) {\\n    developerClickTimes = [];\\n    openDeveloperSettings();\\n  }\\n});\\ndocument.addEventListener(\\\"keydown\\\", (event) => {\\n  if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === \\\"d\\\") {\\n    event.preventDefault();\\n    openDeveloperSettings();\\n  } else if (event.key === \\\"Escape\\\" && !elements.developerOverlay.classList.contains(\\\"hidden\\\")) {\\n    closeDeveloperSettings();\\n  }\\n});\\nelements.developerClose.addEventListener(\\\"click\\\", closeDeveloperSettings);\\nelements.developerOverlay.addEventListener(\\\"click\\\", (event) => {\\n  if (event.target === elements.developerOverlay) closeDeveloperSettings();\\n});\\nelements.developerUnlockForm.addEventListener(\\\"submit\\\", async (event) => {\\n  event.preventDefault();\\n  if (state.developerBusy) return;\\n  state.developerKey = elements.developerKey.value;\\n  if (!state.developerKey) return;\\n  setDeveloperBusy(true, \\\"Đang đọc cấu hình từ máy AI…\\\");\\n  try {\\n    const settings = await developerRequest(\\\"GET\\\");\\n    renderDeveloperSettings(settings);\\n    showMessage(elements.developerMessage, \\\"Đã xác thực. Chỉ lưu khi bạn chủ động bấm áp dụng.\\\", \\\"success\\\");\\n  } catch (error) {\\n    state.developerKey = \\\"\\\";\\n    showMessage(elements.developerMessage, error.message, \\\"error\\\");\\n  } finally {\\n    setDeveloperBusy(false);\\n  }\\n});\\nelements.developerConfigForm.addEventListener(\\\"submit\\\", async (event) => {\\n  event.preventDefault();\\n  if (state.developerBusy || !state.developerSettings) return;\\n  const thresholds = {};\\n  for (const input of elements.developerThresholdRows.querySelectorAll(\\\"input[data-raw-class]\\\")) {\\n    const value = Number(input.value);\\n    if (!Number.isFinite(value) || value <= 0 || value > 1) {\\n      showMessage(elements.developerMessage, `Confidence của ${input.dataset.rawClass} phải trong khoảng 0.01–1.00.`, \\\"error\\\");\\n      input.focus();\\n      return;\\n    }\\n    thresholds[input.dataset.rawClass] = value;\\n  }\\n  const activeModel = elements.developerModel.value;\\n  if (!activeModel) {\\n    showMessage(elements.developerMessage, \\\"Không tìm thấy model hợp lệ trong backend/models.\\\", \\\"error\\\");\\n    return;\\n  }\\n  if (!window.confirm(`Nạp model ${activeModel} và áp dụng threshold mới cho các job tiếp theo?`)) return;\\n  setDeveloperBusy(true, \\\"Đang nạp và kiểm tra model. Vui lòng không tắt máy AI…\\\");\\n  try {\\n    const settings = await developerRequest(\\\"UPDATE\\\", {\\n      active_model: activeModel,\\n      thresholds,\\n    });\\n    renderDeveloperSettings(settings);\\n    if (state.health?.model?.yolo) state.health.model.yolo.model_path = settings.active_model;\\n    showMessage(elements.developerMessage, \\\"Đã áp dụng model và confidence mới cho các job tiếp theo.\\\", \\\"success\\\");\\n  } catch (error) {\\n    showMessage(elements.developerMessage, error.message, \\\"error\\\");\\n  } finally {\\n    setDeveloperBusy(false);\\n  }\\n});\\n\\nasync function resumeActiveJob() {\\n  let active = null;\\n\\n  try {\\n    active = JSON.parse(\\n      safeStorage.getItem(\\n        activeJobStorageKey,\\n      ) || \\\"null\\\"\\n    );\\n  } catch (_) {\\n    safeStorage.removeItem(\\n      activeJobStorageKey,\\n    );\\n  }\\n\\n  if (\\n    !active?.job_id\\n    || !/^[0-9a-f]{32}$/.test(\\n      active.job_id\\n    )\\n  ) {\\n    return;\\n  }\\n\\n  if (\\n    active.upload_mode === \\\"direct\\\"\\n    || active.upload_mode === \\\"orchestrated\\\"\\n  ) {\\n    state.uploadMode =\\n      active.upload_mode;\\n  }\\n\\n  state.jobId =\\n    active.job_id;\\n\\n  state.lastSubmitPayload =\\n    active.submit_payload || null;\\n\\n  // The job already stores its own mode server-side.  Keep the picker at\\n  // AUTO so every newly opened/reused web session starts from the operating\\n  // default rather than inheriting a previous job's manual YOLO/Foundation mode.\\n  state.inferenceMode = defaultInferenceMode;\\n  elements.inferenceMode.value = defaultInferenceMode;\\n\\n  state.pollRetryCount = 0;\\n\\n  elements.processingSection\\n    .classList.remove(\\\"hidden\\\");\\n\\n  elements.processingSection\\n    .querySelector(\\\".spinner\\\")\\n    .classList.remove(\\\"hidden\\\");\\n\\n  elements.processingTitle.textContent =\\n    \\\"Đang tiếp tục job trước…\\\";\\n\\n  elements.processingCopy.textContent =\\n    `Job ${active.job_id}`;\\n\\n  scheduleJobPoll(\\n    initialJobPollDelayMs\\n  );\\n}\\n\\n(async () => {\\n  if (remoteWebhookMode) {\\n    // Public operator page: open the counting UI immediately. Browser-facing\\n    // n8n endpoints no longer require Basic Auth; worker endpoints stay locked.\\n    state.apiAuthorization = \\\"\\\";\\n    document.documentElement.classList.add(\\\"authenticated\\\");\\n    const ready = await checkHealth();\\n    if (ready) {\\n      await resumeActiveJob();\\n    }\\n    return;\\n  }\\n  await checkHealth();\\n  await resumeActiveJob();\\n})();\\n\\n</script>\\n</body>\\n</html>\\n\" } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        0
+      ],
+      "id": "c266b4e1-408f-4082-bca8-e394d8168765",
+      "name": "00a - Web UI - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        0
+      ],
+      "id": "73cf17e6-8b06-4818-af6b-75cc53f91290",
+      "name": "00a - Web UI - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-upload-init",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        192
+      ],
+      "id": "bcbec525-5034-44c3-91f0-6c950963ee24",
+      "name": "01 - Init Upload",
+      "webhookId": "outbound-worker-006"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.requests = store.requests || {};\nstore.jobs = store.jobs || {};\nstore.worker = store.worker || {};\nconst body = $json.body || {};\nconst files = Array.isArray(body.files) ? body.files : [];\nconst inferenceMode = String(body.inference_mode || 'AUTO').toUpperCase();\nconst validModes = new Set(['AUTO', 'YOLO', 'FOUNDATION', 'COMPARE']);\nconst allowed = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/bmp']);\nconst maxImages = Math.max(1, Number(store.worker?.max_images_per_job || 50));\nconst maxFile = 50 * 1024 * 1024;\nconst maxTotalMb = Math.max(1, Number(store.worker?.max_job_upload_size_mb || 50));\nconst maxTotal = maxTotalMb * 1024 * 1024;\nlet error = '';\nif (!files.length) error = 'Upload at least one image.';\nelse if (!validModes.has(inferenceMode)) error = 'Invalid inference mode.';\nelse if (files.length > maxImages) error = 'A job accepts at most ' + maxImages + ' images of the same SKU.';\nelse if (files.some(f => !allowed.has(String(f.content_type || '')))) error = 'Unsupported image format.';\nelse if (files.some(f => Number(f.size_bytes || 0) <= 0 || Number(f.size_bytes) > maxFile)) error = 'An image exceeds the 50 MB limit.';\nelse if (files.reduce((sum, f) => sum + Number(f.size_bytes || 0), 0) > maxTotal) error = 'Total upload exceeds the ' + maxTotalMb + ' MB limit.';\nif (error) return [{ json: { status: 'ERROR', error, detail: error } }];\nconst jobId = Array.from(\n  { length: 32 },\n  () => Math.floor(Math.random() * 16).toString(16),\n).join('');\nconst now = Date.now();\nconst task = { task_id: jobId, job_id: jobId, task_type: 'PRESIGN', payload: { files, inference_mode: inferenceMode }, status: 'QUEUED', attempts: 0, created_at: now, updated_at: now };\nstore.tasks[jobId] = task;\nstore.queue.push(jobId);\nstore.requests[jobId] = { request_id: jobId, job_id: jobId, inference_mode: inferenceMode, status: 'WAITING_FOR_WORKER', created_at: new Date(now).toISOString() };\nreturn [{ json: store.requests[jobId] }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        192
+      ],
+      "id": "b6deadb5-ac06-4741-a379-1229c4577962",
+      "name": "01 - Init Upload - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        192
+      ],
+      "id": "3266969a-bd33-46ca-9fac-3a1f03cf9641",
+      "name": "01 - Init Upload - Respond"
+    },
+    {
+      "parameters": {
+        "path": "bakery-request-status",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        368
+      ],
+      "id": "a9c37152-b3ae-45fe-abd7-be6697107b94",
+      "name": "01b - Upload Status",
+      "webhookId": "outbound-worker-010"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.requests = store.requests || {};\nconst requestId = String(($json.query || {}).request_id || '');\nconst request = store.requests[requestId];\nif (!request) return [{ json: { status: 'ERROR', error: 'Upload request not found.', detail: 'Upload request not found.' } }];\nreturn [{ json: request }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        368
+      ],
+      "id": "8bd56de8-e217-4881-9344-f46557d1ef9b",
+      "name": "01b - Upload Status - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        368
+      ],
+      "id": "a318ffda-9746-4de3-85ad-346b106bf53e",
+      "name": "01b - Upload Status - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-submit",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        544
+      ],
+      "id": "07fdb140-848a-48a1-a710-e0bcafbac22d",
+      "name": "02 - Submit Job",
+      "webhookId": "outbound-worker-014"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.jobs = store.jobs || {};\nconst body = $json.body || {};\nconst jobId = String(body.job_id || '');\nconst files = Array.isArray(body.files) ? body.files : [];\nconst inferenceMode = String(body.inference_mode || 'AUTO').toUpperCase();\nif (!/^[0-9a-f]{32}$/.test(jobId) || !files.length || !['AUTO', 'YOLO', 'FOUNDATION', 'COMPARE'].includes(inferenceMode)) {\n  const detail = 'Invalid job ID or empty R2 file list.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\nif (store.jobs[jobId]) return [{ json: store.jobs[jobId] }];\nconst uploadRequest = store.requests?.[jobId];\nconst expectedFiles = Array.isArray(uploadRequest?.uploads)\n  ? uploadRequest.uploads.map(item => ({ object_key: String(item.object_key || '') }))\n  : [];\nconst suppliedKeys = files.map(item => String(item.object_key || '')).sort();\nconst expectedKeys = expectedFiles.map(item => item.object_key).sort();\nif (\n  uploadRequest?.status !== 'READY'\n  || String(uploadRequest?.inference_mode || 'AUTO').toUpperCase() !== inferenceMode\n  || !expectedFiles.length\n  || JSON.stringify(suppliedKeys) !== JSON.stringify(expectedKeys)\n) {\n  const detail = 'R2 files do not match a ready upload session.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\nconst now = Date.now();\nconst taskId = 'process-' + jobId;\nstore.tasks[taskId] = { task_id: taskId, job_id: jobId, task_type: 'PROCESS', payload: { job_id: jobId, files: expectedFiles, inference_mode: inferenceMode }, status: 'QUEUED', attempts: 0, created_at: now, updated_at: now };\nstore.queue.push(taskId);\nstore.jobs[jobId] = { job_id: jobId, inference_mode: inferenceMode, status: 'QUEUED', total_images: files.length, processed_images: 0, created_at: new Date(now).toISOString(), updated_at: new Date(now).toISOString(), products: [], images: [], r2_objects: [], error: '' };\nreturn [{ json: { ...store.jobs[jobId], status_url: '/webhook/bakery-job-status?job_id=' + jobId, message: 'Job queued for the outbound AI worker.' } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        544
+      ],
+      "id": "8566a481-6808-4596-8197-9053992327ab",
+      "name": "02 - Submit Job - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        544
+      ],
+      "id": "bc025b41-51ce-43ee-96cf-d5540559dae3",
+      "name": "02 - Submit Job - Respond"
+    },
+    {
+      "parameters": {
+        "path": "bakery-job-status",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        720
+      ],
+      "id": "532fe94e-1735-4e7e-b7e1-37e44f224da7",
+      "name": "03 - Job Status",
+      "webhookId": "outbound-worker-018"
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nstore.jobs = store.jobs || {};\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.processFinals = store.processFinals || {};\n\nconst jobId = String(($json.query || {}).job_id || '');\nconst current = store.jobs[jobId];\nconst snapshot = store.processFinals[jobId];\nconst processTask = store.tasks['process-' + jobId];\nconst taskFinal = processTask?.final_result && typeof processTask.final_result === 'object'\n  ? processTask.final_result\n  : null;\n\nfunction hasDecisionPayload(value) {\n  return Boolean(\n    value\n    && value.decision\n    && typeof value.decision === 'object'\n    && String(value.decision.decision || '').trim()\n  );\n}\n\nfunction isProcessTerminal(value) {\n  const status = String(value?.status || '').toUpperCase();\n  return ['AWAITING_CONFIRMATION', 'NEEDS_RETAKE', 'COMPLETED'].includes(status);\n}\n\nconst finalCandidate = [snapshot, taskFinal]\n  .filter(value => value && typeof value === 'object')\n  .sort((a, b) => {\n    const aRich = Number(isProcessTerminal(a)) + Number(hasDecisionPayload(a));\n    const bRich = Number(isProcessTerminal(b)) + Number(hasDecisionPayload(b));\n    if (aRich !== bRich) return bRich - aRich;\n    const aTime = Date.parse(a.worker_final_at || a.updated_at || a.created_at || 0) || 0;\n    const bTime = Date.parse(b.worker_final_at || b.updated_at || b.created_at || 0) || 0;\n    return bTime - aTime;\n  })[0] || null;\n\nif (!current && !finalCandidate) {\n  return [{ json: { status: 'ERROR', error: 'Job not found.', detail: 'Job not found.' } }];\n}\n\nconst currentStatus = String(current?.status || '').toUpperCase();\n\n// Confirmation/completion state is newer than the PROCESS result. Preserve it,\n// but merge the PROCESS final underneath so decision/images remain available\n// after a confirmation error.\nif (['CONFIRMING', 'COMPLETED', 'ERROR'].includes(currentStatus)) {\n  if (finalCandidate && currentStatus === 'CONFIRMING') {\n    return [{ json: { ...finalCandidate, ...current, job_id: jobId } }];\n  }\n  return [{ json: current }];\n}\n\n// For processing/terminal-pre-confirmation states, the rich worker-final\n// snapshot wins over any lightweight progress object that may still be visible.\nif (finalCandidate && isProcessTerminal(finalCandidate) && hasDecisionPayload(finalCandidate)) {\n  return [{ json: {\n    ...(current || {}),\n    ...finalCandidate,\n    job_id: jobId,\n    served_from_worker_final: true,\n  } }];\n}\n\n// Self-heal jobs created by the older workflow. If the browser can see a\n// terminal status but no decision and no durable final snapshot exists, requeue\n// the SAME PROCESS task at most three times. The local /jobs/from-r2 endpoint is\n// idempotent for an existing job: it returns the existing local state, after\n// which the worker immediately fetches /jobs/{id}/links and republishes the rich\n// final payload. This recovers the already-stuck job without re-running YOLO.\nif (\n  current\n  && ['AWAITING_CONFIRMATION', 'NEEDS_RETAKE'].includes(currentStatus)\n  && !hasDecisionPayload(current)\n  && !finalCandidate\n  && processTask\n  && processTask.payload\n) {\n  const processTaskStatus = String(processTask.status || '').toUpperCase();\n  const repairAttempts = Number(processTask.result_sync_repair_attempts || 0);\n  const now = Date.now();\n  const lastRepair = Number(processTask.result_sync_repair_queued_at || 0);\n  const repairCooldownMs = 60 * 1000;\n\n  if (\n    processTaskStatus === 'COMPLETED'\n    && repairAttempts < 3\n    && (!lastRepair || now - lastRepair >= repairCooldownMs)\n  ) {\n    processTask.status = 'QUEUED';\n    processTask.leased_at = 0;\n    processTask.leased_by = '';\n    processTask.updated_at = now;\n    processTask.result_sync_repair_attempts = repairAttempts + 1;\n    processTask.result_sync_repair_queued_at = now;\n    store.queue = store.queue.filter(id => id !== processTask.task_id);\n    store.queue.push(processTask.task_id);\n\n    return [{ json: {\n      ...current,\n      job_id: jobId,\n      result_sync_repair_queued: true,\n      result_sync_repair_attempt: repairAttempts + 1,\n      message: 'AI đã xử lý xong. Đang yêu cầu worker đồng bộ lại payload kết quả đầy đủ.',\n    } }];\n  }\n}\n\nreturn [{ json: current || finalCandidate }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        720
+      ],
+      "id": "74bb16c3-43d4-4600-9471-a2f21cc8514e",
+      "name": "03 - Job Status - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        720
+      ],
+      "id": "45682de1-dbe1-4c12-a3ab-e5eea55cb606",
+      "name": "03 - Job Status - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-confirm",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        912
+      ],
+      "id": "17afd265-6436-4278-ac10-5134f3c5e8dd",
+      "name": "03b - Confirm Job",
+      "webhookId": "outbound-worker-022"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.jobs = store.jobs || {};\n\nconst body = $json.body || {};\nconst jobId = String(body.job_id || '');\nconst selectedProductCode = String(body.product_code || '').trim();\nconst selectedQuantity = body.quantity == null ? null : Number(body.quantity);\nconst selectedDocumentType = String(body.document_type || 'PURCHASE_RECEIPT').toUpperCase();\n\nif (body.confirm !== true) {\n  const detail = 'Explicit confirmation is required.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\n\nif (!/^[0-9a-f]{32}$/.test(jobId)) {\n  const detail = 'Invalid job ID.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\nif (selectedQuantity !== null && (!Number.isInteger(selectedQuantity) || selectedQuantity < 1 || selectedQuantity > 5000)) {\n  const detail = 'Confirmed quantity must be an integer between 1 and 5000.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\nif (!['PURCHASE_RECEIPT', 'MANUFACTURING'].includes(selectedDocumentType)) {\n  const detail = 'Invalid KiotViet document type.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\n\nconst job = store.jobs[jobId];\nif (!job) {\n  const detail = 'Job not found.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\n\nconst currentStatus = String(job.status || '').toUpperCase();\n\nif (currentStatus === 'COMPLETED' && job.kiotviet?.created === true) {\n  return [{ json: job }];\n}\n\nif (currentStatus === 'CONFIRMING') {\n  const taskId = 'confirm-' + jobId;\n  const existingTask = store.tasks[taskId];\n  if (\n    existingTask\n    && ['QUEUED', 'LEASED'].includes(String(existingTask.status || '').toUpperCase())\n  ) {\n    return [{ json: job }];\n  }\n\n  // The local backend persisted CONFIRMING before calling KiotViet. A retry\n  // must reach that backend so it can reconcile by job_id. Re-queueing the\n  // same task ID is safe; it does not ask the backend for an unguarded POST.\n  const retryPayload = { confirm: true };\n  retryPayload.document_type = String(\n    job.confirmation?.document_type || job.document_type || 'PURCHASE_RECEIPT',\n  ).toUpperCase();\n  const confirmedCode = String(job.confirmation?.product_code || '').trim();\n  if (confirmedCode) retryPayload.product_code = confirmedCode;\n  const confirmedQuantity = Number(job.confirmation?.quantity || 0);\n  if (confirmedQuantity > 0) retryPayload.quantity = confirmedQuantity;\n  const now = Date.now();\n  store.tasks[taskId] = {\n    task_id: taskId,\n    job_id: jobId,\n    task_type: 'CONFIRM',\n    payload: retryPayload,\n    status: 'QUEUED',\n    attempts: 0,\n    created_at: now,\n    updated_at: now,\n  };\n  store.queue = store.queue.filter(id => id !== taskId);\n  store.queue.push(taskId);\n  store.jobs[jobId] = {\n    ...job,\n    confirmation_error: '',\n    updated_at: new Date(now).toISOString(),\n  };\n  return [{ json: {\n    ...store.jobs[jobId],\n    message: 'Confirmation reconciliation queued for the outbound AI worker.',\n  } }];\n}\n\nif (currentStatus !== 'AWAITING_CONFIRMATION') {\n  const detail = 'Job is not waiting for confirmation. Current status: ' + currentStatus + '.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\n\nconst decision = job.decision && typeof job.decision === 'object' ? job.decision : {};\nconst decisionType = String(decision.decision || '').toUpperCase();\n\nif (!['DIRECT', 'FAMILY', 'REVIEW'].includes(decisionType)) {\n  const detail = 'Only DIRECT, FAMILY or REVIEW decisions can be confirmed.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\n\nconst taskPayload = { confirm: true, document_type: selectedDocumentType };\nif (selectedQuantity !== null) taskPayload.quantity = selectedQuantity;\n\n// The operator UI intentionally allows correcting DIRECT / FAMILY / REVIEW\n// results to \"Khác\" (another product in the supported catalog).  Validate the\n// correction against the job's closed product_catalog instead of restricting\n// FAMILY/REVIEW to only the AI suggestions.  This keeps arbitrary product codes\n// out while allowing the manual correction flow shown in the UI.\nlet targetProductCode = selectedProductCode;\n\nif (!targetProductCode && decisionType === 'DIRECT') {\n  targetProductCode = String(decision.product_code || '').trim();\n}\n\nif (!targetProductCode) {\n  const detail = 'Select a supported product before confirming.';\n  return [{ json: { status: 'ERROR', error: detail, detail } }];\n}\n\nconst productCatalog = Array.isArray(job.product_catalog)\n  ? job.product_catalog\n  : [];\n\nconst catalogMatch = productCatalog.find(\n  product => String(product?.product_code || '').trim().toLowerCase()\n    === targetProductCode.toLowerCase(),\n);\n\nif (productCatalog.length) {\n  if (!catalogMatch) {\n    const detail = 'Selected product is not in the supported product catalog.';\n    return [{ json: { status: 'ERROR', error: detail, detail } }];\n  }\n\n  // Use the canonical code from the catalog, preserving exact case/spelling.\n  taskPayload.product_code = String(catalogMatch.product_code || '').trim();\n} else {\n  // Backward-compatible fallback for old jobs that were created before\n  // product_catalog was included in worker responses.\n  let validFallback = false;\n  let canonicalFallbackCode = targetProductCode;\n\n  if (decisionType === 'DIRECT') {\n    const expectedCode = String(decision.product_code || '').trim();\n    validFallback = Boolean(\n      expectedCode\n      && expectedCode.toLowerCase() === targetProductCode.toLowerCase()\n    );\n    if (validFallback) canonicalFallbackCode = expectedCode;\n  } else if (decisionType === 'FAMILY') {\n    const members = Array.isArray(decision.members) ? decision.members : [];\n    const member = members.find(\n      item => String(item?.product_code || '').trim().toLowerCase()\n        === targetProductCode.toLowerCase(),\n    );\n    validFallback = Boolean(member);\n    if (member) canonicalFallbackCode = String(member.product_code || '').trim();\n  } else {\n    const candidates = Array.isArray(decision.candidates) ? decision.candidates : [];\n    const candidate = candidates.find(\n      item => String(item?.product_code || '').trim().toLowerCase()\n        === targetProductCode.toLowerCase(),\n    );\n    validFallback = Boolean(candidate);\n    if (candidate) canonicalFallbackCode = String(candidate.product_code || '').trim();\n  }\n\n  if (!validFallback) {\n    const detail = 'This older job has no product catalog; select one of its AI suggestions or run a new job.';\n    return [{ json: { status: 'ERROR', error: detail, detail } }];\n  }\n\n  taskPayload.product_code = canonicalFallbackCode;\n}\n\nconst taskId = 'confirm-' + jobId;\nconst existingTask = store.tasks[taskId];\n\nif (\n  existingTask\n  && ['QUEUED', 'LEASED'].includes(String(existingTask.status || '').toUpperCase())\n) {\n  return [{ json: store.jobs[jobId] }];\n}\n\nconst now = Date.now();\nstore.tasks[taskId] = {\n  task_id: taskId,\n  job_id: jobId,\n  task_type: 'CONFIRM',\n  payload: taskPayload,\n  status: 'QUEUED',\n  attempts: 0,\n  created_at: now,\n  updated_at: now,\n};\nstore.queue.push(taskId);\n\nstore.jobs[jobId] = {\n  ...job,\n  status: 'CONFIRMING',\n  confirmation: {\n    requested_at: new Date(now).toISOString(),\n    product_code: taskPayload.product_code || decision.product_code || null,\n    quantity: taskPayload.quantity || decision.count || null,\n    document_type: taskPayload.document_type,\n  },\n  document_type: taskPayload.document_type,\n  confirmation_error: '',\n  updated_at: new Date(now).toISOString(),\n};\n\nreturn [{\n  json: {\n    ...store.jobs[jobId],\n    message: 'Confirmation queued for the outbound AI worker.',\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        912
+      ],
+      "id": "4ffad922-0fb0-448d-a828-2854b2941eda",
+      "name": "03b - Confirm Job - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        912
+      ],
+      "id": "beb56840-b136-460c-84fb-2bdc545fa35b",
+      "name": "03b - Confirm Job - Respond"
+    },
+    {
+      "parameters": {
+        "path": "bakery-worker-next",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1088
+      ],
+      "id": "7b273a6a-e3c1-4f68-aac4-156144c87f73",
+      "name": "04 - Worker Next",
+      "webhookId": "outbound-worker-026",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "gVwKQzabSgtnyWS7",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.worker = store.worker || {};\nconst workerId = String(($json.query || {}).worker_id || 'unknown-worker');\nconst now = Date.now();\nconst leaseMs = 60 * 60 * 1000;\n\n// A healthy worker polls this endpoint frequently. If it is the currently\n// registered worker, let the poll refresh last_seen as a secondary liveness\n// signal. This prevents one transient heartbeat failure from making the web UI\n// immediately report the worker offline.\nif (String(store.worker.worker_id || '') === workerId) {\n  store.worker.last_seen_ms = now;\n  store.worker.last_seen = new Date(now).toISOString();\n}\n\nlet selected = null;\nfor (const taskId of store.queue) {\n  const task = store.tasks[taskId];\n  if (!task) continue;\n  const expired = (\n    task.status === 'LEASED'\n    && Number(task.leased_at || 0) + leaseMs < now\n  );\n  if (task.status === 'QUEUED' || expired) {\n    task.status = 'LEASED';\n    task.leased_at = now;\n    task.leased_by = workerId;\n    task.attempts = Number(task.attempts || 0) + 1;\n    task.updated_at = now;\n    selected = { ...task };\n    break;\n  }\n}\n\n// Run maintenance only when the queue is idle, never inside the heartbeat or\n// a result-report path. Keep the sweep bounded so it cannot monopolize an n8n\n// webhook execution if static data has grown large.\nif (!selected && Number(store.last_cleanup_ms || 0) + 60 * 60 * 1000 < now) {\n  store.requests = store.requests || {};\n  store.jobs = store.jobs || {};\n  store.processFinals = store.processFinals || {};\n  store.developerRequests = store.developerRequests || {};\n\n  const taskCutoff = now - 24 * 60 * 60 * 1000;\n  const jobCutoff = now - 30 * 24 * 60 * 60 * 1000;\n  const cleanupBudget = 500;\n  let removed = 0;\n\n  for (const [id, task] of Object.entries(store.tasks)) {\n    if (removed >= cleanupBudget) break;\n    if (\n      ['COMPLETED', 'ERROR'].includes(String(task.status || '').toUpperCase())\n      && Number(task.updated_at || 0) < taskCutoff\n    ) {\n      delete store.tasks[id];\n      removed += 1;\n    }\n  }\n\n  for (const [id, request] of Object.entries(store.requests)) {\n    if (removed >= cleanupBudget) break;\n    const updated = Date.parse(request.updated_at || request.created_at || 0);\n    if (Number.isFinite(updated) && updated < taskCutoff) {\n      delete store.requests[id];\n      removed += 1;\n    }\n  }\n\n  for (const [id, job] of Object.entries(store.jobs)) {\n    if (removed >= cleanupBudget) break;\n    const updated = Date.parse(job.updated_at || job.created_at || 0);\n    if (\n      ['COMPLETED', 'ERROR'].includes(String(job.status || '').toUpperCase())\n      && Number.isFinite(updated)\n      && updated < jobCutoff\n    ) {\n      delete store.jobs[id];\n      removed += 1;\n    }\n  }\n\n  for (const [id, snapshot] of Object.entries(store.processFinals)) {\n    if (removed >= cleanupBudget) break;\n    const updated = Date.parse(snapshot.worker_final_at || snapshot.updated_at || snapshot.created_at || 0);\n    if (Number.isFinite(updated) && updated < jobCutoff) {\n      delete store.processFinals[id];\n      removed += 1;\n    }\n  }\n\n  for (const [id, request] of Object.entries(store.developerRequests)) {\n    if (removed >= cleanupBudget) break;\n    const updated = Date.parse(request.updated_at || request.created_at || 0);\n    if (Number.isFinite(updated) && updated < taskCutoff) {\n      delete store.developerRequests[id];\n      removed += 1;\n    }\n  }\n\n  store.queue = store.queue.filter(\n    id => store.tasks[id]\n      && !['COMPLETED', 'ERROR'].includes(\n        String(store.tasks[id].status || '').toUpperCase(),\n      ),\n  );\n\n  // If the budget was exhausted, make another idle cleanup eligible in ~5 min;\n  // otherwise wait the normal hour.\n  store.last_cleanup_ms = removed >= cleanupBudget\n    ? now - 55 * 60 * 1000\n    : now;\n}\n\nreturn [{ json: { task: selected } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        1088
+      ],
+      "id": "ad8e8b01-a83a-4765-b5bb-8d3cf634adff",
+      "name": "04 - Worker Next - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        1088
+      ],
+      "id": "86676da7-f44e-4177-a0a4-404cf0749f11",
+      "name": "04 - Worker Next - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-worker-result",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1264
+      ],
+      "id": "6d11ae1c-8235-455c-971c-176e0b1d82be",
+      "name": "05 - Worker Result",
+      "webhookId": "outbound-worker-030",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "gVwKQzabSgtnyWS7",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.requests = store.requests || {};\nstore.jobs = store.jobs || {};\nstore.processFinals = store.processFinals || {};\nstore.worker = store.worker || {};\nstore.developerRequests = store.developerRequests || {};\n\nconst body = $json.body || {};\nconst taskId = String(body.task_id || '');\nconst task = store.tasks[taskId];\nif (!task) return [{ json: { ok: false, detail: 'Task not found.' } }];\n\nconst result = body.result && typeof body.result === 'object' ? body.result : {};\nconst ok = body.ok === true;\nconst final = body.final === true;\nconst error = String(body.error || result.error || '');\nconst now = Date.now();\nconst nowIso = new Date(now).toISOString();\nconst taskType = String(task.task_type || '').toUpperCase();\n\nfunction hasDecisionPayload(value) {\n  return Boolean(\n    value\n    && value.decision\n    && typeof value.decision === 'object'\n    && String(value.decision.decision || '').trim()\n  );\n}\n\nfunction isProcessTerminal(value) {\n  const status = String(value?.status || '').toUpperCase();\n  return ['AWAITING_CONFIRMATION', 'NEEDS_RETAKE', 'COMPLETED'].includes(status);\n}\n\nfunction saveProcessFinal(jobId, payload) {\n  const merged = {\n    ...(store.jobs[jobId] || {}),\n    ...payload,\n    job_id: jobId,\n    worker_final: true,\n    worker_final_at: nowIso,\n    updated_at: nowIso,\n  };\n  store.jobs[jobId] = merged;\n  store.processFinals[jobId] = { ...merged };\n  task.final_result = { ...merged };\n  task.final_result_at = now;\n  return merged;\n}\n\n// Idempotent repair path. A worker may retry a final callback after losing the\n// HTTP response. The previous workflow returned early for completed tasks and\n// could therefore discard the richer final linked payload. Always accept a\n// duplicate final PROCESS result as a repair snapshot.\nif (task.status === 'COMPLETED' || task.status === 'ERROR') {\n  if (taskType === 'PROCESS' && ok && final && Object.keys(result).length) {\n    const repaired = saveProcessFinal(task.job_id, result);\n    return [{ json: {\n      ok: true,\n      task_id: taskId,\n      final: true,\n      duplicate: true,\n      repaired: true,\n      status: repaired.status || '',\n      has_decision: hasDecisionPayload(repaired),\n    } }];\n  }\n  return [{ json: { ok: true, task_id: taskId, final: true, duplicate: true } }];\n}\n\nconst reportingWorker = String(body.worker_id || '');\nconst registeredWorker = String(store.worker.worker_id || '');\nconst ownsLease = String(task.leased_by || '') === reportingWorker;\nconst canRecoverStaleLease = Boolean(reportingWorker)\n  && reportingWorker === registeredWorker\n  && ['QUEUED', 'LEASED'].includes(String(task.status || '').toUpperCase());\nif (!ownsLease && !canRecoverStaleLease) {\n  return [{ json: { ok: false, detail: 'Task lease does not belong to this worker.' } }];\n}\n\nif (canRecoverStaleLease) {\n  task.status = 'LEASED';\n  task.leased_by = reportingWorker;\n}\ntask.updated_at = now;\ntask.leased_at = now;\n\nif (taskType === 'PRESIGN') {\n  if (ok && final) {\n    store.requests[task.job_id] = {\n      ...(store.requests[task.job_id] || {}),\n      ...result,\n      request_id: task.job_id,\n      job_id: task.job_id,\n      inference_mode: String(task.payload?.inference_mode || 'AUTO').toUpperCase(),\n      status: 'READY',\n      updated_at: nowIso,\n    };\n  }\n  if (!ok && final) {\n    store.requests[task.job_id] = {\n      request_id: task.job_id,\n      job_id: task.job_id,\n      status: 'ERROR',\n      error,\n      detail: error,\n      updated_at: nowIso,\n    };\n  }\n}\n\nif (taskType === 'PROCESS') {\n  if (ok && final) {\n    // Final linked state from /jobs/{id}/links is authoritative. Keep a second\n    // durable snapshot so bakery-job-status can recover if a stale lightweight\n    // progress object is visible in store.jobs.\n    saveProcessFinal(task.job_id, result);\n  } else if (ok) {\n    const existingFinal = store.processFinals[task.job_id];\n    const current = store.jobs[task.job_id] || {};\n    const currentIsRichTerminal = isProcessTerminal(current) && hasDecisionPayload(current);\n\n    // Never let a late/partial progress callback downgrade a rich terminal state.\n    if (!existingFinal && !currentIsRichTerminal) {\n      store.jobs[task.job_id] = {\n        ...current,\n        ...result,\n        job_id: task.job_id,\n        updated_at: nowIso,\n      };\n    }\n  }\n\n  if (!ok && final) {\n    store.jobs[task.job_id] = {\n      ...(store.jobs[task.job_id] || {}),\n      ...result,\n      job_id: task.job_id,\n      status: 'ERROR',\n      error,\n      updated_at: nowIso,\n    };\n    delete store.processFinals[task.job_id];\n  }\n}\n\nif (taskType === 'CONFIRM') {\n  if (ok) {\n    store.jobs[task.job_id] = {\n      ...(store.jobs[task.job_id] || {}),\n      ...result,\n      job_id: task.job_id,\n      confirmation_error: '',\n      updated_at: nowIso,\n    };\n    if (final && String(result.status || '').toUpperCase() === 'COMPLETED') {\n      delete store.processFinals[task.job_id];\n    }\n  }\n  if (!ok && final) {\n    store.jobs[task.job_id] = {\n      ...(store.jobs[task.job_id] || {}),\n      job_id: task.job_id,\n      status: 'CONFIRMING',\n      confirmation_error: error || 'Confirmation failed.',\n      error: '',\n      updated_at: nowIso,\n    };\n  }\n}\n\nif (taskType === 'DEVELOPER_SETTINGS') {\n  store.developerRequests[task.job_id] = ok && final\n    ? {\n        ...(store.developerRequests[task.job_id] || {}),\n        ...result,\n        request_id: task.job_id,\n        status: 'COMPLETED',\n        updated_at: nowIso,\n      }\n    : {\n        ...(store.developerRequests[task.job_id] || {}),\n        request_id: task.job_id,\n        status: final ? 'ERROR' : 'PROCESSING',\n        error,\n        detail: error,\n        updated_at: nowIso,\n      };\n  if (final && task.payload) delete task.payload.developer_key;\n}\n\nif (final) {\n  task.status = ok ? 'COMPLETED' : 'ERROR';\n  store.queue = store.queue.filter(id => id !== taskId);\n}\n\nreturn [{ json: {\n  ok: true,\n  task_id: taskId,\n  final,\n  process_final_saved: taskType === 'PROCESS' && ok && final,\n  has_decision: taskType === 'PROCESS' && ok && final ? hasDecisionPayload(store.jobs[task.job_id]) : undefined,\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        1264
+      ],
+      "id": "6eea4ef5-2ac0-4869-9939-b053c6108b4d",
+      "name": "05 - Worker Result - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        1264
+      ],
+      "id": "b42584cd-22d9-443c-9e2e-485d4d50bbb5",
+      "name": "05 - Worker Result - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-worker-heartbeat",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1440
+      ],
+      "id": "b139c675-12be-4c36-9625-078c2b5ade04",
+      "name": "06 - Worker Heartbeat",
+      "webhookId": "outbound-worker-034",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "gVwKQzabSgtnyWS7",
+          "name": "Sharon Bakery Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nconst body = $json.body || {};\nconst now = Date.now();\nconst previousWorkerId = String(store.worker?.worker_id || '');\nconst currentWorkerId = String(body.worker_id || '');\n\n// If a new worker process replaces the previous one, return only the old\n// worker's leased tasks to the queue. Keep heartbeat itself lightweight.\nif (previousWorkerId && currentWorkerId && previousWorkerId !== currentWorkerId) {\n  store.tasks = store.tasks || {};\n  for (const task of Object.values(store.tasks)) {\n    if (\n      String(task.status || '').toUpperCase() === 'LEASED'\n      && String(task.leased_by || '') === previousWorkerId\n    ) {\n      task.status = 'QUEUED';\n      task.leased_by = '';\n      task.leased_at = 0;\n      task.updated_at = now;\n    }\n  }\n}\n\n// Preserve any fields from the previous snapshot if an older worker omits\n// them, while refreshing the authoritative liveness timestamp.\nstore.worker = {\n  ...(store.worker || {}),\n  ...body,\n  worker_id: currentWorkerId,\n  last_seen_ms: now,\n  last_seen: new Date(now).toISOString(),\n};\n\n// IMPORTANT: cleanup is intentionally NOT performed in the heartbeat route.\n// The old workflow could do a large hourly sweep here, making a liveness call\n// slow or fail under load. Maintenance now runs only while Worker Next is idle.\nreturn [{\n  json: {\n    ok: true,\n    worker_id: currentWorkerId,\n    last_seen: store.worker.last_seen,\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        1440
+      ],
+      "id": "24ec7446-0172-427e-b57c-c3db0d7283ba",
+      "name": "06 - Worker Heartbeat - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        1440
+      ],
+      "id": "e3392b91-889e-4943-963c-9ab542f507dc",
+      "name": "06 - Worker Heartbeat - Respond"
+    },
+    {
+      "parameters": {
+        "path": "bakery-health",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1632
+      ],
+      "id": "19e47651-08a0-4b9e-a5ef-88c0418b7bcf",
+      "name": "00 - Health",
+      "webhookId": "outbound-worker-038"
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nconst worker = store.worker || {};\n// Heartbeat defaults to 10 s. Allow a few missed beats / transient proxy 503s\n// before declaring the worker offline.\nconst online = Number(worker.last_seen_ms || 0) + 45000 > Date.now();\nreturn [{ json: {\n  ready: online && worker.ready === true && worker.r2_configured === true,\n  orchestration: 'n8n-outbound-worker',\n  worker_online: online,\n  worker_id: worker.worker_id || null,\n  worker_last_seen: worker.last_seen || null,\n  r2_configured: worker.r2_configured === true,\n  kiotviet_configured: worker.kiotviet_configured === true,\n  manufacturing_configured: worker.manufacturing_configured === true,\n  kiotviet_auto_create_draft: worker.kiotviet_auto_create_draft === true,\n  model: worker.model || null,\n  max_images_per_job: Math.max(1, Number(worker.max_images_per_job || 50)),\n  max_image_size_mb: worker.max_image_size_mb || 50,\n  max_job_upload_size_mb: worker.max_job_upload_size_mb || 50,\n  allowed_image_extensions: worker.allowed_image_extensions || ['.jpg', '.jpeg', '.png', '.webp', '.bmp'],\n  error: online ? '' : 'Outbound AI worker is offline.',\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        1632
+      ],
+      "id": "7c594569-9239-4fe8-9845-a95b3b123fab",
+      "name": "00 - Health - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        1632
+      ],
+      "id": "1c8258b6-5956-4400-99eb-0ec981bedd98",
+      "name": "00 - Health - Respond"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bakery-developer-settings",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1808
+      ],
+      "id": "a47efcbb-e563-4669-9ca7-cc5b37d695e7",
+      "name": "07 - Developer Settings",
+      "webhookId": "outbound-worker-042"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.tasks = store.tasks || {};\nstore.queue = store.queue || [];\nstore.developerRequests = store.developerRequests || {};\nconst body = $json.body || {};\nconst action = String(body.action || 'GET').trim().toUpperCase();\nconst developerKey = String(body.developer_key || '');\nif (!['GET', 'UPDATE'].includes(action) || !developerKey) {\n  return [{ json: { status: 'ERROR', detail: 'Invalid developer settings request.' } }];\n}\nconst requestId = Array.from(\n  { length: 32 },\n  () => Math.floor(Math.random() * 16).toString(16),\n).join('');\nconst taskId = 'developer-' + requestId;\nconst now = Date.now();\nconst payload = { action, developer_key: developerKey };\nif (action === 'UPDATE') {\n  payload.active_model = String(body.active_model || '');\n  payload.thresholds = body.thresholds && typeof body.thresholds === 'object'\n    ? body.thresholds\n    : {};\n}\nstore.tasks[taskId] = {\n  task_id: taskId,\n  job_id: requestId,\n  task_type: 'DEVELOPER_SETTINGS',\n  payload,\n  status: 'QUEUED',\n  attempts: 0,\n  created_at: now,\n  updated_at: now,\n};\nstore.queue.push(taskId);\nstore.developerRequests[requestId] = {\n  request_id: requestId,\n  status: 'QUEUED',\n  action,\n  created_at: new Date(now).toISOString(),\n};\nreturn [{ json: store.developerRequests[requestId] }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        1808
+      ],
+      "id": "aaafca79-cbb1-443f-af6c-66b1f4a975aa",
+      "name": "07 - Developer Settings - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        1808
+      ],
+      "id": "389a5deb-3904-4690-9f9e-2ee9942ed673",
+      "name": "07 - Developer Settings - Respond"
+    },
+    {
+      "parameters": {
+        "path": "bakery-developer-settings-status",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1984
+      ],
+      "id": "9986e5da-f079-400c-a243-a4e8b30870d9",
+      "name": "07b - Developer Settings Status",
+      "webhookId": "outbound-worker-046"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst store = $getWorkflowStaticData('global');\nstore.developerRequests = store.developerRequests || {};\nconst requestId = String(($json.query || {}).request_id || '');\nconst request = store.developerRequests[requestId];\nif (!request) {\n  return [{ json: { status: 'ERROR', detail: 'Developer request not found.' } }];\n}\nreturn [{ json: request }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        1984
+      ],
+      "id": "bcdbccea-6b96-4a1c-a720-c973337ab74c",
+      "name": "07b - Developer Settings Status - State"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        1984
+      ],
+      "id": "acbc2d09-4512-4e3c-97a1-d5ffe5eb76c1",
+      "name": "07b - Developer Settings Status - Respond"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "00a - Web UI": {
+      "main": [
+        [
+          {
+            "node": "00a - Web UI - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00a - Web UI - State": {
+      "main": [
+        [
+          {
+            "node": "00a - Web UI - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 - Init Upload": {
+      "main": [
+        [
+          {
+            "node": "01 - Init Upload - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 - Init Upload - State": {
+      "main": [
+        [
+          {
+            "node": "01 - Init Upload - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01b - Upload Status": {
+      "main": [
+        [
+          {
+            "node": "01b - Upload Status - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01b - Upload Status - State": {
+      "main": [
+        [
+          {
+            "node": "01b - Upload Status - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Submit Job": {
+      "main": [
+        [
+          {
+            "node": "02 - Submit Job - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Submit Job - State": {
+      "main": [
+        [
+          {
+            "node": "02 - Submit Job - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Job Status": {
+      "main": [
+        [
+          {
+            "node": "03 - Job Status - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Job Status - State": {
+      "main": [
+        [
+          {
+            "node": "03 - Job Status - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03b - Confirm Job": {
+      "main": [
+        [
+          {
+            "node": "03b - Confirm Job - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03b - Confirm Job - State": {
+      "main": [
+        [
+          {
+            "node": "03b - Confirm Job - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 - Worker Next": {
+      "main": [
+        [
+          {
+            "node": "04 - Worker Next - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 - Worker Next - State": {
+      "main": [
+        [
+          {
+            "node": "04 - Worker Next - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 - Worker Result": {
+      "main": [
+        [
+          {
+            "node": "05 - Worker Result - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 - Worker Result - State": {
+      "main": [
+        [
+          {
+            "node": "05 - Worker Result - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 - Worker Heartbeat": {
+      "main": [
+        [
+          {
+            "node": "06 - Worker Heartbeat - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 - Worker Heartbeat - State": {
+      "main": [
+        [
+          {
+            "node": "06 - Worker Heartbeat - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 - Health": {
+      "main": [
+        [
+          {
+            "node": "00 - Health - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 - Health - State": {
+      "main": [
+        [
+          {
+            "node": "00 - Health - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 - Developer Settings": {
+      "main": [
+        [
+          {
+            "node": "07 - Developer Settings - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 - Developer Settings - State": {
+      "main": [
+        [
+          {
+            "node": "07 - Developer Settings - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07b - Developer Settings Status": {
+      "main": [
+        [
+          {
+            "node": "07b - Developer Settings Status - State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07b - Developer Settings Status - State": {
+      "main": [
+        [
+          {
+            "node": "07b - Developer Settings Status - Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d5ac441a-d5a9-462b-8f1c-85b3014e9748",
+  "meta": {
+    "instanceId": "947fb651e6906e9631e456f4fa4c9692e4b73d1d99d0b3c1b8eeb32e2674ab3f",
+    "sharon_patch": "operator-correction-catalog-v2"
+  },
+  "nodeGroups": [],
+  "id": "UPxV4QHye29cULUI",
+  "tags": []
+}

@@ -7,7 +7,19 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
-JobState = Literal["QUEUED", "PROCESSING", "COMPLETED", "ERROR"]
+InferenceMode = Literal["AUTO", "YOLO", "FOUNDATION", "COMPARE"]
+DocumentType = Literal["PURCHASE_RECEIPT", "MANUFACTURING"]
+
+
+JobState = Literal[
+    "QUEUED",
+    "PROCESSING",
+    "AWAITING_CONFIRMATION",
+    "NEEDS_RETAKE",
+    "CONFIRMING",
+    "COMPLETED",
+    "ERROR",
+]
 
 
 class ProductSummary(BaseModel):
@@ -45,6 +57,7 @@ class UploadFileRequest(BaseModel):
 class PresignUploadsRequest(BaseModel):
     job_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
     files: list[UploadFileRequest] = Field(min_length=1)
+    inference_mode: InferenceMode = "AUTO"
 
 
 class PresignedUpload(BaseModel):
@@ -71,6 +84,7 @@ class R2JobFile(BaseModel):
 class CreateR2JobRequest(BaseModel):
     job_id: str = Field(pattern=r"^[0-9a-f]{32}$")
     files: list[R2JobFile] = Field(min_length=1)
+    inference_mode: InferenceMode = "AUTO"
 
 
 class JobStatusResponse(BaseModel):
@@ -81,6 +95,10 @@ class JobStatusResponse(BaseModel):
     total_images: int = Field(ge=1)
     processed_images: int = Field(default=0, ge=0)
     error: str = ""
+    message: str = ""
+    confirmation_error: str = ""
+    decision: dict[str, Any] | None = None
+    confirmed_product: dict[str, Any] | None = None
     product_count: int = Field(default=0, ge=0)
     total_quantity: int = Field(default=0, ge=0)
     products: list[ProductSummary] = Field(default_factory=list)
@@ -89,6 +107,9 @@ class JobStatusResponse(BaseModel):
     excel_url: str | None = None
     r2_objects: list[dict[str, Any]] = Field(default_factory=list)
     kiotviet: dict[str, Any] | None = None
+    document_type: DocumentType | None = None
+    inference_mode: InferenceMode = "AUTO"
+    pseudo_label: dict[str, Any] | None = None
 
 
 class KiotVietSubmitRequest(BaseModel):
@@ -101,9 +122,11 @@ class BakeryHealthResponse(BaseModel):
     model: dict[str, Any] | None = None
     r2_configured: bool = False
     kiotviet_configured: bool = False
+    manufacturing_configured: bool = False
     kiotviet_auto_create_draft: bool = False
     max_images_per_job: int = Field(default=50, ge=1)
     max_image_size_mb: float = Field(default=50, gt=0)
-    max_job_upload_size_mb: float = Field(default=160, gt=0)
+    max_job_upload_size_mb: float = Field(default=200, gt=0)
     allowed_image_extensions: list[str] = Field(default_factory=list)
+    pseudo_label: dict[str, Any] | None = None
     error: str = ""

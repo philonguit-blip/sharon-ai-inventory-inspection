@@ -1,0 +1,426 @@
+{
+  "schema_version": 1,
+  "description": "Foundation references are added with scripts/hybrid_reference_manager.py. Product keys must match reference_keys in the generated NPZ.",
+  "products": {
+    "BR-BAG-COMMON-280-350_BaguetteStandard": {
+      "type": "family",
+      "display_name": "Standard Baguette 280/350",
+      "members": [
+        {
+          "product_code": "BR-BAG-0000008-280",
+          "product_name": "Baguette 280gr",
+          "display_name": "Baguette 280gr"
+        },
+        {
+          "product_code": "BR-BAG-0000013-350",
+          "product_name": "Baguette French Sourdough 350",
+          "display_name": "Baguette French Sourdough 350"
+        }
+      ]
+    },
+    "BR-BRE-0000052-1800_CountryBread_1800g": {
+      "type": "direct",
+      "product_code": "BR-BRE-0000052-1800",
+      "product_name": "Country Bread 1800g",
+      "display_name": "Country Bread 1800g"
+    },
+    "BR-CHA-0000046_ChallahMini": {
+      "type": "direct",
+      "product_code": "BR-CHA-0000046",
+      "product_name": "Challah Mini",
+      "display_name": "Challah Mini"
+    },
+    "BR-MUF-0000061-120_EnglishMuffin": {
+      "type": "direct",
+      "product_code": "BR-MUF-0000061-120",
+      "product_name": "English Muffin",
+      "display_name": "English Muffin"
+    },
+    "BR-SD-0000122_SourdoughSharonBagel_Pc": {
+      "type": "direct",
+      "product_code": "BR-SD-0000122",
+      "product_name": "Sourdough Sharon Bagel (Pc)",
+      "display_name": "Sourdough Sharon Bagel (Pc)"
+    },
+    "BR-SD-0000123_SourdoughSharonCiabatta_Pc": {
+      "type": "direct",
+      "product_code": "BR-SD-0000123",
+      "product_name": "Sourdough Sharon Ciabatta (Pc)",
+      "display_name": "Sourdough Sharon Ciabatta (Pc)"
+    },
+    "BR-SD-0000127-750_SourdoughSharonMultiseed_Pc": {
+      "type": "direct",
+      "product_code": "BR-SD-0000127-750",
+      "product_name": "Sourdough Sharon Multiseed (Pc)",
+      "display_name": "Sourdough Sharon Multiseed (Pc)"
+    },
+    "BR-SD-0000133_SourdoughWholemealBread_Pc": {
+      "type": "direct",
+      "product_code": "BR-SD-0000133",
+      "product_name": "Sourdough Wholemeal Bread (Pc)",
+      "display_name": "Sourdough Wholemeal Bread (Pc)"
+    },
+    "BR-SD-COMMON-RUSTIC_SourdoughRusticLoaf": {
+      "type": "family",
+      "display_name": "Rustic Sourdough Loaf",
+      "members": [
+        {
+          "product_code": "BR-SD-0000135",
+          "product_name": "Wholemeal Sourdough Walnuts Bread",
+          "display_name": "Wholemeal Sourdough Walnuts Bread"
+        },
+        {
+          "product_code": "BR-SD-0000131",
+          "product_name": "Sourdough Sharon White Bread (Pc)",
+          "display_name": "Sourdough Sharon White Bread (Pc)"
+        },
+        {
+          "product_code": "BR-SD-0000167",
+          "product_name": "Sourdough Dark Rye",
+          "display_name": "Sourdough Dark Rye"
+        },
+        {
+          "product_code": "BR-SD-0000107",
+          "product_name": "Sourdough Charcoal",
+          "display_name": "Sourdough Charcoal"
+        }
+      ]
+    },
+    "BR-SW-COMMON-1KG_WhiteSandwichLoaf": {
+      "type": "family",
+      "display_name": "White Sandwich Loaf 1kg",
+      "members": [
+        {
+          "product_code": "BR-SW-0000093-1000",
+          "product_name": "Sandwich White Vegan 1kg",
+          "display_name": "Sandwich White Vegan 1kg"
+        },
+        {
+          "product_code": "BR-SW-0000088",
+          "product_name": "White Sandwich 1kg",
+          "display_name": "White Sandwich 1kg"
+        }
+      ]
+    },
+    "PA-CRO-0000054_MiniCroissant_Baked": {
+      "type": "direct",
+      "product_code": "PA-CRO-0000054",
+      "product_name": "Bánh nhiều lớp - Viennoiserie - Mini Croissant (Baked)",
+      "display_name": "Mini Croissant (Baked)"
+    },
+    "PA-DAN-0000021_MiniDanishshell_Baked": {
+      "type": "direct",
+      "product_code": "PA-DAN-0000021",
+      "product_name": "Bánh nhiều lớp - Viennoiserie - Mini Danish Shell (Baked)",
+      "display_name": "Mini Danish Shell (Baked)"
+    },
+    "BR-GF-00000155": {
+      "type": "direct",
+      "product_code": "BR-GF-00000155",
+      "product_name": "Cake Mini Bagel Gluten Free 40g",
+      "display_name": "Cake Mini Bagel Gluten Free 40g"
+    },
+    "CA-GF-0000169": {
+      "type": "direct",
+      "product_code": "CA-GF-0000169",
+      "product_name": "CakeMiniVanilamuffinglutenfree_40g",
+      "display_name": "Cake Mini Vanila muffin gluten free 40g"
+    },
+    "BR-GF-00000156": {
+      "type": "direct",
+      "product_code": "BR-GF-00000156",
+      "product_name": "CakeMiniBaguetteGlutenfree_40g",
+      "display_name": "Cake Mini Baguette Gluten free 40g"
+    },
+    "BR-BUN-0000033": {
+      "type": "direct",
+      "product_code": "BR-BUN-0000033",
+      "product_name": "BR-BUN-0000033_BunBurgerPotato",
+      "display_name": "Bun Burger Potato"
+    },
+    "BR-BUN-0000040": {
+      "type": "direct",
+      "product_code": "BR-BUN-0000040",
+      "product_name": "BR-BUN-0000040_BunVeganGreen",
+      "display_name": "Bun Vegan Green"
+    },
+    "BR-LEV-0000156-40": {
+      "type": "direct",
+      "product_code": "BR-LEV-0000156-40",
+      "product_name": "BR-LEV-0000156-40_LevinMultigrainMini",
+      "display_name": "Levin Multigrain Mini"
+    },
+    "CA-COO-0000040_112": {
+      "type": "family",
+      "display_name": "COMMON Cookies",
+      "members": [
+        {
+          "product_code": "CA-COO-0000040",
+          "product_name": "CA-COO-0000040_EarlgreyCookies",
+          "display_name": "Earl Grey Cookies"
+        },
+        {
+          "product_code": "CA-COO-0000112",
+          "product_name": "CA-COO-0000112_ChocolateCookies_15g",
+          "display_name": "Chocolate Cookies 15g"
+        }
+      ]
+    },
+    "BR-FOC-0000055-2000": {
+      "type": "direct",
+      "product_code": "BR-FOC-0000055-2000",
+      "product_name": "BR-FOC-0000055-2000_FocacciaTomatoOliu",
+      "display_name": "Focaccia Tomato & Oliu"
+    },
+    "BR-SD-0000160-40": {
+      "type": "direct",
+      "product_code": "BR-SD-0000160-40",
+      "product_name": "BR-SD-0000160-40_SourdoughRollMini",
+      "display_name": "Sourdough Roll Mini"
+    },
+    "CA-GRI-0000041": {
+      "type": "direct",
+      "product_code": "CA-GRI-0000041",
+      "product_name": "CA-GRI-0000041_GarlicGrissini",
+      "display_name": "Garlic Grissini"
+    },
+    "BR-BUN-0000041": {
+      "type": "direct",
+      "product_code": "BR-BUN-0000041",
+      "product_name": "BR-BUN-0000041_BunVeganRed",
+      "display_name": "Bun Vegan Red"
+    },
+    "CA-BRE-0000005": {
+      "type": "direct",
+      "product_code": "CA-BRE-0000005",
+      "product_name": "CA-BRE-0000005_BananaBreadNoSugar",
+      "display_name": "Banana Bread No Sugar"
+    },
+    "BR-SD-0000113": {
+      "type": "direct",
+      "product_code": "BR-SD-0000113",
+      "product_name": "BR-SD-0000113_SourdoughDarkRyewithMultiseedcover",
+      "display_name": "Sourdough Dark Rye with Multiseed cover"
+    },
+    "CA-BAB-0000079": {
+      "type": "direct",
+      "product_code": "CA-BAB-0000079",
+      "product_name": "CA-BAB-0000079_SharonDarkChocolateBabka-Regular",
+      "display_name": "Sharon Dark Chocolate Babka - Regular"
+    },
+    "BR-DON-0000098": {
+      "type": "direct",
+      "product_code": "BR-DON-0000098",
+      "product_name": "BR-DON-0000098_SofiDonutFrozenShapeRing5-6cm",
+      "display_name": "Sofi Donut Frozen Shape Ring 5-6cm"
+    },
+    "BR-SD-0000151-1800": {
+      "type": "direct",
+      "product_code": "BR-SD-0000151-1800",
+      "product_name": "BR-SD-0000151-1800_TartineBreadBig",
+      "display_name": "Tartine Bread Big"
+    },
+    "BR-SD-0000001": {
+      "type": "direct",
+      "product_code": "BR-SD-0000001",
+      "product_name": "BR-SD-0000001_ArtisanGFLoaf",
+      "display_name": "Artisan GF Loaf"
+    },
+    "PA-PAA-0000070-30": {
+      "type": "direct",
+      "product_code": "PA-PAA-0000070-30",
+      "product_name": "PA-PAA-0000070-30_PainAuChocolates_Baked",
+      "display_name": "PainAuChocolates_Baked"
+    },
+    "BR-SW-0000097": {
+      "type": "direct",
+      "product_code": "BR-SW-0000097",
+      "product_name": "BR-SW-0000097_SandwichWholemealwithSeeds",
+      "display_name": "Sandwich Wholemeal with Seeds"
+    },
+    "BR-SW-0000079-750": {
+      "type": "direct",
+      "product_code": "BR-SW-0000079-750",
+      "product_name": "BR-SW-0000079-750_SandwichDarkRye",
+      "display_name": "Sandwich Dark Rye"
+    },
+    "CA-GF-0000167_CakeMiniBrowniemuffingluten": {
+      "type": "direct",
+      "product_code": "CA-GF-0000167",
+      "product_name": "Cake Mini Brownie muffin gluten",
+      "display_name": "Cake Mini Brownie muffin gluten"
+    },
+    "CA-MUF-0000054-vegan_MiniChocolateMuffin_30g": {
+      "type": "direct",
+      "product_code": "CA-MUF-0000054-vegan",
+      "product_name": "Mini Chocolate Muffin 30g",
+      "display_name": "Mini Chocolate Muffin 30g"
+    },
+    "COMMON_BaguetteMini": {
+      "type": "family",
+      "display_name": "COMMON Baguette Mini",
+      "members": [
+        {
+          "product_code": "BR-BAG-0000154-40",
+          "product_name": "Baguette Mini",
+          "display_name": "Baguette Mini"
+        },
+        {
+          "product_code": "BR-BAG-0000155-70",
+          "product_name": "Baguette_Mini",
+          "display_name": "Baguette Mini"
+        },
+        {
+          "product_code": "BR-BAG-0000015-50",
+          "product_name": "Baguette Mini",
+          "display_name": "Baguette Mini"
+        }
+      ]
+    },
+    "COMMON_BurgerNoSesame": {
+      "type": "family",
+      "display_name": "COMMON Burger No Sesame",
+      "members": [
+        {
+          "product_code": "BR-BUN-0000032",
+          "product_name": "BunBurgernoSesame",
+          "display_name": "Bun Burger no Sesame"
+        },
+        {
+          "product_code": "BR-BUN-0000031",
+          "product_name": "BunBurgerMininoSesame",
+          "display_name": "Bun Burger Mini no Sesame"
+        },
+        {
+          "product_code": "BR-BUN-00000181",
+          "product_name": "Potato Burger No Sesame",
+          "display_name": "Potato Burger No Sesame"
+        }
+      ]
+    },
+    "BR-SD-0000173-1500_SourdoughSharonMultiseed_1500g": {
+      "type": "direct",
+      "product_code": "BR-SD-0000173-1500",
+      "product_name": "Sourdough Sharon Multiseed 1500g",
+      "display_name": "Sourdough Sharon Multiseed 1500g"
+    },
+    "CA-SCO-0000058": {
+      "type": "direct",
+      "product_code": "CA-SCO-0000058",
+      "product_name": "Mini Scone Plain",
+      "display_name": "Mini Scone Plain"
+    },
+    "BR-CIA-00000125": {
+      "type": "direct",
+      "product_code": "BR-CIA-00000125",
+      "product_name": "Round ciabatta",
+      "display_name": "Round ciabatta"
+    },
+    "PA-PAA-0000070-30_PainAuChocolates_Baked": {
+      "type": "direct",
+      "product_code": "PA-PAA-0000070-30",
+      "product_name": "PA-PAA-0000070-30_PainAuChocolates_Baked",
+      "display_name": "PainAuChocolates_Baked"
+    },
+    "BR-BUN-0000041_BunVeganRed": {
+      "type": "direct",
+      "product_code": "BR-BUN-0000041",
+      "product_name": "BR-BUN-0000041_BunVeganRed",
+      "display_name": "Bun Vegan Red"
+    },
+    "CA-COO-0000040_112_COMMON_Cookies": {
+      "type": "family",
+      "display_name": "COMMON Cookies",
+      "members": [
+        {
+          "product_code": "CA-COO-0000040",
+          "product_name": "CA-COO-0000040_EarlgreyCookies",
+          "display_name": "Earl Grey Cookies"
+        },
+        {
+          "product_code": "CA-COO-0000112",
+          "product_name": "CA-COO-0000112_ChocolateCookies_15g",
+          "display_name": "Chocolate Cookies 15g"
+        }
+      ]
+    },
+    "BR-GF-00000155_CakeMiniBagelGlutenFree_40g": {
+      "type": "direct",
+      "product_code": "BR-GF-00000155",
+      "product_name": "Cake Mini Bagel Gluten Free 40g",
+      "display_name": "Cake Mini Bagel Gluten Free 40g"
+    },
+    "BR-DON-0000098_SofiDonutFrozenShapeRing5-6cm": {
+      "type": "direct",
+      "product_code": "BR-DON-0000098-Sofi",
+      "product_name": "BR-DON-0000098_SofiDonutFrozenShapeRing5-6cm",
+      "display_name": "Sofi Donut Frozen Shape Ring 5-6cm"
+    },
+    "BR-BUN-0000040_BunVeganGreen": {
+      "type": "direct",
+      "product_code": "BR-BUN-0000040",
+      "product_name": "BR-BUN-0000040_BunVeganGreen",
+      "display_name": "Bun Vegan Green"
+    },
+    "CA-GF-0000169_CakeMiniVanilamuffinglutenfree_40g": {
+      "type": "direct",
+      "product_code": "CA-GF-0000169",
+      "product_name": "CakeMiniVanilamuffinglutenfree_40g",
+      "display_name": "Cake Mini Vanila muffin gluten free 40g"
+    },
+    "CA-GRI-0000041_GarlicGrissini": {
+      "type": "direct",
+      "product_code": "CA-GRI-0000041",
+      "product_name": "CA-GRI-0000041_GarlicGrissini",
+      "display_name": "Garlic Grissini"
+    },
+    "BR-LEV-0000156-40_LevinMultigrainMini": {
+      "type": "direct",
+      "product_code": "BR-LEV-0000156-40",
+      "product_name": "BR-LEV-0000156-40_LevinMultigrainMini",
+      "display_name": "Levin Multigrain Mini"
+    },
+    "BR-SD-0000160-40_SourdoughRollMini": {
+      "type": "direct",
+      "product_code": "BR-SD-0000160-40",
+      "product_name": "BR-SD-0000160-40_SourdoughRollMini",
+      "display_name": "Sourdough Roll Mini"
+    },
+    "BR-BUN-0000033_BunBurgerPotato": {
+      "type": "direct",
+      "product_code": "BR-BUN-0000033",
+      "product_name": "BR-BUN-0000033_BunBurgerPotato",
+      "display_name": "Bun Burger Potato"
+    },
+    "BR-SD-0000103-900": {
+      "type": "direct",
+      "product_code": "BR-SD-0000103-900",
+      "product_name": "Sourdough 100% Wholemeal 900gr",
+      "display_name": "Sourdough 100% Wholemeal 900gr"
+    },
+    "BR-BRE-0000158-50": {
+      "type": "direct",
+      "product_code": "BR-BRE-0000158-50",
+      "product_name": "Rye Bread Mini",
+      "display_name": "Rye Bread Mini"
+    },
+    "BR-BUN-0000035-Snap": {
+      "type": "direct",
+      "product_code": "BR-BUN-0000035-Snap",
+      "product_name": "Bun Hotdog",
+      "display_name": "Bun Hotdog"
+    },
+    "CA-CAK-0000020": {
+      "type": "direct",
+      "product_code": "CA-CAK-0000020",
+      "product_name": "Carrot Cake",
+      "display_name": "Carrot Cake"
+    },
+    "CA-MAC-0000055": {
+      "type": "direct",
+      "product_code": "CA-MAC-0000055",
+      "product_name": "Mini Macaron",
+      "display_name": "Mini Macaron"
+    }
+  }
+}

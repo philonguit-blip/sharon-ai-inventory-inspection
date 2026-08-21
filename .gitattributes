@@ -20,3 +20,4 @@
 *.png binary
 *.webp binary
 *.bmp binary
+backend/models/best_YOLO26s_2429_27SKUs.pt filter=lfs diff=lfs merge=lfs -text

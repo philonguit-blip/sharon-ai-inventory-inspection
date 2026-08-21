@@ -40,7 +40,7 @@ class ExcelService:
     def aggregate_products(
         self, inference_results: Iterable[dict[str, Any]]
     ) -> list[dict[str, Any]]:
-        """Sum quantities by KiotViet product code across multiple images."""
+        """Aggregate confirmed quantities by KiotViet product code."""
         grouped: OrderedDict[str, dict[str, Any]] = OrderedDict()
         result_count = 0
 
